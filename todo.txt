@@ -3,7 +3,7 @@
 (c) KL
 
 TODO:
-.Grab focus on surface click to process keyboard events
++Grab focus on surface click to process keyboard events
 .Replace the property grid with a more friendly UI
 .PictureFormat serialization
 .Suppress flicker on repaint

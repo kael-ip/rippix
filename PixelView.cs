@@ -382,5 +382,9 @@ namespace Rippix {
                 }
             }
         }
+        protected override void OnMouseDown(MouseEventArgs e) {
+            base.OnMouseDown(e);
+            this.Focus();
+        }
     }
 }
