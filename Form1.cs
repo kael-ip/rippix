@@ -11,6 +11,7 @@ namespace Rippix {
     public partial class Form1 : Form {
         public Form1() {
             InitializeComponent();
+            this.Icon = Rippix.Properties.Resources.MainIcon;
             this.ClientSize = new Size(800, 600);
             propertyGrid1.SelectedObject = pixelView1.Format;
             pixelView1.Format.PropertyChanged += new PropertyChangedEventHandler(Format_PropertyChanged);
