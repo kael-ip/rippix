@@ -226,6 +226,7 @@ namespace Rippix {
 
         public PixelView() {
             this.SetStyle(ControlStyles.Selectable, true);
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             format.PropertyChanged += new PropertyChangedEventHandler(format_PropertyChanged);
         }
         void format_PropertyChanged(object sender, PropertyChangedEventArgs e) {

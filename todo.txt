@@ -6,10 +6,11 @@ TODO:
 +Grab focus on surface click to process keyboard events
 .Replace the property grid with a more friendly UI
 .PictureFormat serialization
-.Suppress flicker on repaint
++Suppress flicker on repaint
 .Separate format geometry from offsets
 .Use the serialized geometry format for presets (also show selection by comparing serialized data)
 .Add grayscale mode presets
 .Bitplanes
 .Fixed palettes
 .Fixed palettes save and load
+.Pan h&v per pixel, not per byte (as an option in multibyte packing modes)
