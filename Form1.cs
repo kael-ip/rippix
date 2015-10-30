@@ -12,12 +12,9 @@ namespace Rippix {
         public Form1() {
             InitializeComponent();
             this.ClientSize = new Size(800, 600);
-            //var p = new PixelView() { Dock = DockStyle.Fill };
-            //this.Controls.Add(p);
-            //p.BringToFront();
             propertyGrid1.SelectedObject = pixelView1.Format;
-            //pixelView1.KeyDown+=new KeyEventHandler(control_KeyDown);
             pixelView1.Format.PropertyChanged += new PropertyChangedEventHandler(Format_PropertyChanged);
+            toolTip1.SetToolTip(pixelView1, helpText);
         }
 
         void Format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -86,5 +83,21 @@ namespace Rippix {
             pixelView1.Format.SetPacking(0, 8, 8, 8, 16, 8, 24, 0);
         }
 
+        #region
+        const string helpText = @"
+Key controls:
+Up, Down - Pan vertically
+Left, Right - Pan horizontally
+PageUp, PageDown - Pan vertically by page
+Z - Zoom in
+
+Shift mode:
+Up, Down - Change picture height
+Left, Right - Change picture width
+Z - Zoom out
+
+Control mode - Step by 8 instead of 1
+";
+        #endregion
     }
 }
