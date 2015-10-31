@@ -13,13 +13,16 @@ namespace Rippix {
             InitializeComponent();
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.ClientSize = new Size(800, 600);
+            propertyGrid1.Height = 300;
             propertyGrid1.SelectedObject = pixelView1.Format;
+            propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
             pixelView1.Format.PropertyChanged += new PropertyChangedEventHandler(Format_PropertyChanged);
             toolTip1.SetToolTip(pixelView1, helpText);
         }
 
         void Format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             propertyGrid1.Refresh();
+            propertyGrid2.Refresh();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -41,47 +44,47 @@ namespace Rippix {
         }
 
         private void r8G8B8A8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(24, 8, 16, 8, 8, 8, 0, 8);
+            pixelView1.Format.SetPacking(32, 24, 8, 16, 8, 8, 8, 0, 8);
         }
 
         private void b8G8R8A8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(8, 8, 16, 8, 24, 8, 0, 8);
+            pixelView1.Format.SetPacking(32, 8, 8, 16, 8, 24, 8, 0, 8);
         }
 
         private void a8R8G8B8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(16, 8, 8, 8, 0, 8, 24, 8);
+            pixelView1.Format.SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
 
         private void a8B8G8R8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(0, 8, 8, 8, 16, 8, 24, 8);
+            pixelView1.Format.SetPacking(32, 0, 8, 8, 8, 16, 8, 24, 8);
         }
 
         private void a1R5G5B5ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(10, 5, 5, 5, 0, 5, 15, 1);
+            pixelView1.Format.SetPacking(16, 10, 5, 5, 5, 0, 5, 15, 1);
         }
 
         private void r5G6B5ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(11, 5, 5, 6, 0, 5, 0, 0);
+            pixelView1.Format.SetPacking(16, 11, 5, 5, 6, 0, 5, 0, 0);
         }
 
         private void r3G3B2ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(5, 3, 2, 3, 0, 2, 0, 0);
+            pixelView1.Format.SetPacking(8, 5, 3, 2, 3, 0, 2, 0, 0);
         }
 
         private void alpha8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.BitsA = 8;
+            pixelView1.Format.ColorFormat.BitsA = 8;
         }
 
         private void alpha0ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.BitsA = 0;
+            pixelView1.Format.ColorFormat.BitsA = 0;
         }
 
         private void r8G8B8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(16, 8, 8, 8, 0, 8, 24, 0);
+            pixelView1.Format.SetPacking(24, 16, 8, 8, 8, 0, 8, 24, 0);
         }
 
         private void b8G8R8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(0, 8, 8, 8, 16, 8, 24, 0);
+            pixelView1.Format.SetPacking(24, 0, 8, 8, 8, 16, 8, 24, 0);
         }
 
         #region

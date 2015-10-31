@@ -43,9 +43,12 @@
             this.alpha0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
-            this.pixelView1 = new Rippix.PixelView();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.propertyGrid2 = new System.Windows.Forms.PropertyGrid();
+            this.pixelView1 = new Rippix.PixelView();
             this.menuStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -192,11 +195,33 @@
             // propertyGrid1
             // 
             this.propertyGrid1.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.propertyGrid1.Location = new System.Drawing.Point(357, 24);
+            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.propertyGrid1.HelpVisible = false;
+            this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(240, 238);
+            this.propertyGrid1.Size = new System.Drawing.Size(240, 118);
             this.propertyGrid1.TabIndex = 1;
+            this.propertyGrid1.ToolbarVisible = false;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.propertyGrid2);
+            this.panel1.Controls.Add(this.propertyGrid1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel1.Location = new System.Drawing.Point(357, 24);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(240, 238);
+            this.panel1.TabIndex = 3;
+            // 
+            // propertyGrid2
+            // 
+            this.propertyGrid2.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.propertyGrid2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid2.Location = new System.Drawing.Point(0, 118);
+            this.propertyGrid2.Name = "propertyGrid2";
+            this.propertyGrid2.Size = new System.Drawing.Size(240, 120);
+            this.propertyGrid2.TabIndex = 2;
+            this.propertyGrid2.ToolbarVisible = false;
             // 
             // pixelView1
             // 
@@ -214,13 +239,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(597, 262);
             this.Controls.Add(this.pixelView1);
-            this.Controls.Add(this.propertyGrid1);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -249,6 +275,8 @@
         private System.Windows.Forms.ToolStripMenuItem r8G8B8ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem b8G8R8ToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.PropertyGrid propertyGrid2;
     }
 }
 

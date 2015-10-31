@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Rippix {
     /*
@@ -25,6 +26,46 @@ namespace Rippix {
     //TODO: bitplanes
     //TODO: exotic modes
 
+    public class ColorFormat : INotifyPropertyChanged {
+        private int bpp;
+        private int shiftR, shiftG, shiftB, shiftA;
+        private int bitsR, bitsG, bitsB, bitsA;
+
+        public ColorFormat() {
+        }
+        public ColorFormat(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
+            this.bpp = bpp;
+            this.ShiftR = shiftR;
+            this.BitsR = bitsR;
+            this.ShiftG = shiftG;
+            this.BitsG = bitsG;
+            this.ShiftB = shiftB;
+            this.BitsB = bitsB;
+            this.ShiftA = shiftA;
+            this.BitsA = bitsA;
+        }
+
+        public int BPP { get { return bpp; } set { SetIntPropertyValue("BPP", ref bpp, value, 1, 32, true); } }
+        public int ShiftR { get { return shiftR; } set { SetIntPropertyValue("ShiftR", ref shiftR, value, 0, 32, true); } }
+        public int ShiftG { get { return shiftG; } set { SetIntPropertyValue("ShiftG", ref shiftG, value, 0, 32, true); } }
+        public int ShiftB { get { return shiftB; } set { SetIntPropertyValue("ShiftB", ref shiftB, value, 0, 32, true); } }
+        public int ShiftA { get { return shiftA; } set { SetIntPropertyValue("ShiftA", ref shiftA, value, 0, 32, true); } }
+        public int BitsR { get { return bitsR; } set { SetIntPropertyValue("BitsR", ref bitsR, value, 0, 12, true); } }
+        public int BitsG { get { return bitsG; } set { SetIntPropertyValue("BitsG", ref bitsG, value, 0, 12, true); } }
+        public int BitsB { get { return bitsB; } set { SetIntPropertyValue("BitsB", ref bitsB, value, 0, 12, true); } }
+        public int BitsA { get { return bitsA; } set { SetIntPropertyValue("BitsA", ref bitsA, value, 0, 12, true); } }
+
+        private void SetIntPropertyValue(string name, ref int store, int value, int min, int max, bool makeDirty) {
+            if (value == store) return;
+            store = Math.Max(min, Math.Min(max, value));
+            OnChanged(name);
+        }
+        private void OnChanged(string propertyName) {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+
     public class PictureFormat : INotifyPropertyChanged {
         private byte[] data;
         private int picOffset;
@@ -33,17 +74,21 @@ namespace Rippix {
         private int picHeight;
         private int picBPP;
         private int palOffset;
-        private int palBPP;
         private bool palRelative;
         private bool indexed;
-        private int shiftR, shiftG, shiftB, shiftA;
-        private int bitsR, bitsG, bitsB, bitsA;
         private int[] palCache;
         private bool palCacheDirty;
+        private ColorFormat colorFormat;
 
         public PictureFormat() {
             palCache = new int[256];
+            colorFormat = new ColorFormat();
+            colorFormat.PropertyChanged += colorFormat_PropertyChanged;
             Reset();
+        }
+        void colorFormat_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            palCacheDirty = true;
+            OnChanged("ColorFormat." + e.PropertyName);
         }
         public void Reset() {
             this.data = null;
@@ -52,11 +97,10 @@ namespace Rippix {
             this.picHeight = 16;
             this.picBPP = 32;
             this.palOffset = 0;
-            this.palBPP = 32;
             this.palRelative = true;
             this.indexed = false;
             this.palCacheDirty = true;
-            SetPacking(16, 8, 8, 8, 0, 8, 24, 8);
+            SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
         //public void Assign(PictureFormat source) {
         //    this.data = source.data;
@@ -92,15 +136,7 @@ namespace Rippix {
                 if (CalcStride(PicWidth, value)) { SetIntPropertyValue("PicBPP", ref  picBPP, value, 1, 32, PalRelative); }
             }
         }
-        public int PalBPP { get { return palBPP; } set { SetIntPropertyValue("PalBPP", ref palBPP, value, 1, 32, true); } }
-        public int ShiftR { get { return shiftR; } set { SetIntPropertyValue("ShiftR", ref shiftR, value, 0, 32, true); } }
-        public int ShiftG { get { return shiftG; } set { SetIntPropertyValue("ShiftG", ref shiftG, value, 0, 32, true); } }
-        public int ShiftB { get { return shiftB; } set { SetIntPropertyValue("ShiftB", ref shiftB, value, 0, 32, true); } }
-        public int ShiftA { get { return shiftA; } set { SetIntPropertyValue("ShiftA", ref shiftA, value, 0, 32, true); } }
-        public int BitsR { get { return bitsR; } set { SetIntPropertyValue("BitsR", ref bitsR, value, 0, 12, true); } }
-        public int BitsG { get { return bitsG; } set { SetIntPropertyValue("BitsG", ref bitsG, value, 0, 12, true); } }
-        public int BitsB { get { return bitsB; } set { SetIntPropertyValue("BitsB", ref bitsB, value, 0, 12, true); } }
-        public int BitsA { get { return bitsA; } set { SetIntPropertyValue("BitsA", ref bitsA, value, 0, 12, true); } }
+        public ColorFormat ColorFormat { get { return colorFormat; } }
 
         private void SetIntPropertyValue(string name, ref int store, int value, int min, int max, bool makeDirty) {
             if (value == store) return;
@@ -109,15 +145,16 @@ namespace Rippix {
             OnChanged(name);
         }
 
-        public void SetPacking(int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
-            this.ShiftR = shiftR;
-            this.BitsR = bitsR;
-            this.ShiftG = shiftG;
-            this.BitsG = bitsG;
-            this.ShiftB = shiftB;
-            this.BitsB = bitsB;
-            this.ShiftA = shiftA;
-            this.BitsA = bitsA;
+        public void SetPacking(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
+            colorFormat.BPP = bpp;
+            colorFormat.ShiftR = shiftR;
+            colorFormat.BitsR = bitsR;
+            colorFormat.ShiftG = shiftG;
+            colorFormat.BitsG = bitsG;
+            colorFormat.ShiftB = shiftB;
+            colorFormat.BitsB = bitsB;
+            colorFormat.ShiftA = shiftA;
+            colorFormat.BitsA = bitsA;
         }
         private bool CalcStride(int width, int bpp) {
             if (bpp >= 8 || bpp == 4 || bpp == 2 || bpp == 1) {
@@ -151,13 +188,13 @@ namespace Rippix {
                     v = palCache[v];
                 }
             } else {
-                int cr = ((v >> shiftR) & ((1 << BitsR) - 1)) * 255 / ((1 << BitsR) - 1);
-                int cg = ((v >> shiftG) & ((1 << BitsG) - 1)) * 255 / ((1 << BitsG) - 1);
-                int cb = ((v >> shiftB) & ((1 << BitsB) - 1)) * 255 / ((1 << BitsB) - 1);
-                if (BitsA == 0) {
+                int cr = ((v >> colorFormat.ShiftR) & ((1 << colorFormat.BitsR) - 1)) * 255 / ((1 << colorFormat.BitsR) - 1);
+                int cg = ((v >> colorFormat.ShiftG) & ((1 << colorFormat.BitsG) - 1)) * 255 / ((1 << colorFormat.BitsG) - 1);
+                int cb = ((v >> colorFormat.ShiftB) & ((1 << colorFormat.BitsB) - 1)) * 255 / ((1 << colorFormat.BitsB) - 1);
+                if (colorFormat.BitsA == 0) {
                     v = Pack(cr, cg, cb, 255);
                 } else {
-                    int ca = ((v >> shiftA) & ((1 << BitsA) - 1)) * 255 / ((1 << BitsA) - 1);
+                    int ca = ((v >> colorFormat.ShiftA) & ((1 << colorFormat.BitsA) - 1)) * 255 / ((1 << colorFormat.BitsA) - 1);
                     v = Pack(cr, cg, cb, ca);
                 }
             }
@@ -166,7 +203,7 @@ namespace Rippix {
         private void EnsurePalette() {
             if (palCacheDirty) {
                 for (int i = 0; i <= 255; i++) {
-                    palCache[i] = GetColor(GetPalOffset(), i, palBPP, false);
+                    palCache[i] = GetColor(GetPalOffset(), i, colorFormat.BPP, false);
                 }
                 palCacheDirty = false;
             }
