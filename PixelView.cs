@@ -48,10 +48,6 @@ namespace Rippix {
         protected override void OnPaintBackground(PaintEventArgs pevent) {
             //base.OnPaintBackground(pevent);
         }
-        //protected override void OnLayout(LayoutEventArgs levent) {
-        //    base.OnLayout(levent);
-        //    EnsureBitmap();
-        //}
         private void EnsureBitmap() {
             Size sz = Format.GetBitmapSize();
             if (bitmap == null || bitmap.Size != sz) {
@@ -61,35 +57,27 @@ namespace Rippix {
         int[] lineBuffer;
         long[] timings = new long[100];
         private void UpdateBitmap() {
-            //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            //sw.Start();
-            //timings[0] = sw.ElapsedTicks;
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            timings[0] = sw.ElapsedTicks;
             EnsureBitmap();
-            //timings[1] = sw.ElapsedTicks;
+            timings[1] = sw.ElapsedTicks;
             if (Format.Data == null) return;
             System.Drawing.Imaging.BitmapData bits = bitmap.LockBits(new Rectangle(Point.Empty, bitmap.Size), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
-            //timings[2] = sw.ElapsedTicks;
+            timings[2] = sw.ElapsedTicks;
             EnsureLineBuffer(bits.Width);
-            //timings[3] = sw.ElapsedTicks;
-            //for (int y = 0; y < bits.Height; y++) {
-                int scanPosition = bits.Scan0.ToInt32();
-                int scanline = 0;
-                while (scanline < bits.Height) {
-                    //System.Diagnostics.Stopwatch swy = new System.Diagnostics.Stopwatch();
-                    //swy.Start();
-                    //timings[6] = swy.ElapsedTicks;
-                    RenderScanLine(lineBuffer, scanline);
-                    //timings[7] = swy.ElapsedTicks;
-                    System.Runtime.InteropServices.Marshal.Copy(lineBuffer, 0, (IntPtr)scanPosition, bits.Width);
-                    //timings[8] = swy.ElapsedTicks;
-                    scanPosition += bits.Stride;
-                    scanline++;
-                }
-            //}
-            //timings[4] = sw.ElapsedTicks;
+            timings[3] = sw.ElapsedTicks;
+            int scanPosition = bits.Scan0.ToInt32();
+            int scanline = 0;
+            while (scanline < bits.Height) {
+                RenderScanLine(lineBuffer, scanline);
+                System.Runtime.InteropServices.Marshal.Copy(lineBuffer, 0, (IntPtr)scanPosition, bits.Width);
+                scanPosition += bits.Stride;
+                scanline++;
+            }
+            timings[4] = sw.ElapsedTicks;
             bitmap.UnlockBits(bits);
-            //timings[5] = sw.ElapsedTicks;
-            //Invalidate();
+            timings[5] = sw.ElapsedTicks;
             isDirty = false;
             //ReportTimings();
         }

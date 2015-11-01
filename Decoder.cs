@@ -56,6 +56,21 @@ namespace Rippix {
             store = Math.Max(min, Math.Min(max, value));
             OnChanged(name);
         }
+        public static int Pack(int c0, int c1, int c2, int c3) {
+            return c0 | (c1 << 8) | (c2 << 16) | (c3 << 24);
+        }
+        public int Decode(int v) {
+            int cr = ((v >> ShiftR) & ((1 << BitsR) - 1)) * 255 / ((1 << BitsR) - 1);
+            int cg = ((v >> ShiftG) & ((1 << BitsG) - 1)) * 255 / ((1 << BitsG) - 1);
+            int cb = ((v >> ShiftB) & ((1 << BitsB) - 1)) * 255 / ((1 << BitsB) - 1);
+            if (BitsA == 0) {
+                v = Pack(cr, cg, cb, 255);
+            } else {
+                int ca = ((v >> ShiftA) & ((1 << BitsA) - 1)) * 255 / ((1 << BitsA) - 1);
+                v = Pack(cr, cg, cb, ca);
+            }
+            return v;
+        }
         private void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -171,9 +186,6 @@ namespace Rippix {
             int loffset = PicOffset + (y * PicStride);
             return GetColor(loffset, x, picBPP, indexed);
         }
-        private int Pack(int c0, int c1, int c2, int c3) {
-            return c0 | (c1 << 8) | (c2 << 16) | (c3 << 24);
-        }
         private int GetColor(int loffset, int poffset, int bpp, bool indexed) {
             int v = GetValue(loffset, poffset, bpp);
             if (indexed) {
@@ -184,15 +196,7 @@ namespace Rippix {
                     v = palCache[v];
                 }
             } else {
-                int cr = ((v >> colorFormat.ShiftR) & ((1 << colorFormat.BitsR) - 1)) * 255 / ((1 << colorFormat.BitsR) - 1);
-                int cg = ((v >> colorFormat.ShiftG) & ((1 << colorFormat.BitsG) - 1)) * 255 / ((1 << colorFormat.BitsG) - 1);
-                int cb = ((v >> colorFormat.ShiftB) & ((1 << colorFormat.BitsB) - 1)) * 255 / ((1 << colorFormat.BitsB) - 1);
-                if (colorFormat.BitsA == 0) {
-                    v = Pack(cr, cg, cb, 255);
-                } else {
-                    int ca = ((v >> colorFormat.ShiftA) & ((1 << colorFormat.BitsA) - 1)) * 255 / ((1 << colorFormat.BitsA) - 1);
-                    v = Pack(cr, cg, cb, ca);
-                }
+                v = colorFormat.Decode(v);
             }
             return v;
         }
@@ -210,10 +214,10 @@ namespace Rippix {
             int v = 0;
             switch (bpp) {
                 case 32:
-                    v = Pack(data[offset], data[offset + 1], data[offset + 2], data[offset + 3] << 24);
+                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], data[offset + 3] << 24);
                     break;
                 case 24:
-                    v = Pack(data[offset], data[offset + 1], data[offset + 2], 0);
+                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], 0);
                     break;
                 case 16:
                     v = data[offset] | ((int)data[offset + 1] << 8);
