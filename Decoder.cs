@@ -83,7 +83,7 @@ namespace Rippix {
         private int picStride;
         private int picWidth;
         private int picHeight;
-        private int picBPP;
+        private int indexBPP;
         private int palOffset;
         private bool palRelative;
         private bool indexed;
@@ -106,27 +106,13 @@ namespace Rippix {
             this.picOffset = 0;
             this.picWidth = 16;
             this.picHeight = 16;
-            this.picBPP = 32;
+            this.indexBPP = 32;
             this.palOffset = 0;
             this.palRelative = true;
             this.indexed = false;
             this.palCacheDirty = true;
             SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
-        //public void Assign(PictureFormat source) {
-        //    this.data = source.data;
-        //    this.picOffset = source.picOffset;
-        //    this.PicStride = source.picStride;
-        //    this.PicHeight = source.picHeight;
-        //    //this.picPack = source.picPack;
-        //    this.palOffset = source.palOffset;
-        //    this.palBPP = source.palBPP;
-        //    //this.palPack = source.palPack;
-        //    this.palRelative = source.palRelative;
-        //    this.indexed = source.indexed;
-        //    this.palCacheDirty = true;
-        //    OnChanged(null);
-        //}
         [Browsable(false)]
         public byte[] Data { get { return data; } set { data = value; palCacheDirty = true; OnChanged("Data"); } }
         public int PicOffset { get { return picOffset; } set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue, PalRelative); } }
@@ -134,17 +120,17 @@ namespace Rippix {
         public int PicWidth {
             get { return picWidth; }
             set {
-                if (CalcStride(Math.Max(1, value), picBPP)) { SetIntPropertyValue("PicWidth", ref picWidth, value, 1, int.MaxValue, PalRelative); }
+                if (CalcStride(Math.Max(1, value))) { SetIntPropertyValue("PicWidth", ref picWidth, value, 1, int.MaxValue, PalRelative); }
             }
         }
         public int PicHeight { get { return picHeight; } set { SetIntPropertyValue("PicHeight", ref picHeight, value, 1, int.MaxValue, PalRelative); } }
         public int PalOffset { get { return palOffset; } set { SetIntPropertyValue("PalOffset", ref palOffset, value, 0, int.MaxValue, true); } }
         public bool Indexed { get { return indexed; } set { indexed = value; palCacheDirty = true; OnChanged("Indexed"); } }
         public bool PalRelative { get { return palRelative; } set { palRelative = value; palCacheDirty = true; OnChanged("PalRelative"); } }
-        public int PicBPP {
-            get { return picBPP; }
+        public int IndexBPP {
+            get { return indexBPP; }
             set {
-                if (CalcStride(PicWidth, value)) { SetIntPropertyValue("PicBPP", ref  picBPP, value, 1, 32, PalRelative); }
+                if (CalcStride(PicWidth, value)) { SetIntPropertyValue("PicBPP", ref  indexBPP, value, 1, 32, PalRelative); }
             }
         }
         public ColorFormat ColorFormat { get { return colorFormat; } }
@@ -155,7 +141,6 @@ namespace Rippix {
             if (makeDirty) palCacheDirty = true;
             OnChanged(name);
         }
-
         public void SetPacking(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
             colorFormat.BPP = bpp;
             colorFormat.ShiftR = shiftR;
@@ -166,6 +151,9 @@ namespace Rippix {
             colorFormat.BitsB = bitsB;
             colorFormat.ShiftA = shiftA;
             colorFormat.BitsA = bitsA;
+        }
+        private bool CalcStride(int width) {
+            return CalcStride(width, Indexed ? IndexBPP : ColorFormat.BPP);
         }
         private bool CalcStride(int width, int bpp) {
             if (bpp >= 8 || bpp == 4 || bpp == 2 || bpp == 1) {
@@ -184,29 +172,29 @@ namespace Rippix {
         }
         public int GetRGBAColor(int y, int x) {
             int loffset = PicOffset + (y * PicStride);
-            return GetColor(loffset, x, picBPP, indexed);
-        }
-        private int GetColor(int loffset, int poffset, int bpp, bool indexed) {
-            int v = GetValue(loffset, poffset, bpp);
-            if (indexed) {
-                EnsurePalette();
-                if (v < 0 || v > 255) {
-                    v = 0;
-                } else {
-                    v = palCache[v];
-                }
+            int v;
+            if (Indexed) {
+                v = GetValue(loffset, x, IndexBPP);
+                v = LookupPalette(v);
             } else {
+                v = GetValue(loffset, x, colorFormat.BPP);
                 v = colorFormat.Decode(v);
             }
             return v;
         }
-        private void EnsurePalette() {
+        private int LookupPalette(int c) {
             if (palCacheDirty) {
                 for (int i = 0; i <= 255; i++) {
-                    palCache[i] = GetColor(GetPalOffset(), i, colorFormat.BPP, false);
+                    int v = GetValue(GetPalOffset(), i, colorFormat.BPP);
+                    v = colorFormat.Decode(v);
+                    palCache[i] = v;
                 }
                 palCacheDirty = false;
             }
+            if (c < 0 || c > 255) {
+                return 0;
+            }
+            return palCache[c];
         }
         private int GetValue(int loffset, int poffset, int bpp) {
             int offset = loffset + ((poffset * bpp) >> 3);
