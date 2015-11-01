@@ -90,6 +90,7 @@ namespace Rippix {
         private int[] palCache;
         private bool palCacheDirty;
         private ColorFormat colorFormat;
+        private bool isFixedPalette;
 
         public PictureFormat() {
             palCache = new int[256];
@@ -111,6 +112,7 @@ namespace Rippix {
             this.palRelative = true;
             this.indexed = false;
             this.palCacheDirty = true;
+            this.isFixedPalette = true;
             SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
         [Browsable(false)]
@@ -130,7 +132,16 @@ namespace Rippix {
         public int IndexBPP {
             get { return indexBPP; }
             set {
-                if (CalcStride(PicWidth, value)) { SetIntPropertyValue("PicBPP", ref  indexBPP, value, 1, 32, PalRelative); }
+                if (CalcStride(PicWidth, value)) { SetIntPropertyValue("PicBPP", ref  indexBPP, value, 1, 32, true); }
+            }
+        }
+        public bool IsFixedPalette {
+            get { return isFixedPalette; }
+            set {
+                if (isFixedPalette == value) return;
+                isFixedPalette = value;
+                palCacheDirty = true;
+                OnChanged("IsFixedPalette");
             }
         }
         public ColorFormat ColorFormat { get { return colorFormat; } }
@@ -185,8 +196,16 @@ namespace Rippix {
         private int LookupPalette(int c) {
             if (palCacheDirty) {
                 for (int i = 0; i <= 255; i++) {
-                    int v = GetValue(GetPalOffset(), i, colorFormat.BPP);
-                    v = colorFormat.Decode(v);
+                    int v = 0;
+                    if (IsFixedPalette) {
+                        if (IndexBPP > 0 && IndexBPP <= 8 && i < (1 << IndexBPP)) {
+                            v = 255 * i / ((1 << IndexBPP) - 1);
+                            v = ColorFormat.Pack(v, v, v, 255);
+                        }
+                    } else {
+                        v = GetValue(GetPalOffset(), i, colorFormat.BPP);
+                        v = colorFormat.Decode(v);
+                    }
                     palCache[i] = v;
                 }
                 palCacheDirty = false;
