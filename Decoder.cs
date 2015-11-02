@@ -23,14 +23,12 @@ namespace Rippix {
     //TODO: exotic modes
 
     public class ColorFormat : INotifyPropertyChanged {
-        private int bpp;
         private int shiftR, shiftG, shiftB, shiftA;
         private int bitsR, bitsG, bitsB, bitsA;
 
         public ColorFormat() {
         }
         public ColorFormat(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
-            this.bpp = bpp;
             this.ShiftR = shiftR;
             this.BitsR = bitsR;
             this.ShiftG = shiftG;
@@ -41,7 +39,6 @@ namespace Rippix {
             this.BitsA = bitsA;
         }
 
-        public int BPP { get { return bpp; } set { SetIntPropertyValue("BPP", ref bpp, value, 1, 32, true); } }
         public int ShiftR { get { return shiftR; } set { SetIntPropertyValue("ShiftR", ref shiftR, value, 0, 32, true); } }
         public int ShiftG { get { return shiftG; } set { SetIntPropertyValue("ShiftG", ref shiftG, value, 0, 32, true); } }
         public int ShiftB { get { return shiftB; } set { SetIntPropertyValue("ShiftB", ref shiftB, value, 0, 32, true); } }
@@ -83,6 +80,7 @@ namespace Rippix {
         private int picStride;
         private int picWidth;
         private int picHeight;
+        private int colorBPP;
         private int indexBPP;
         private int palOffset;
         private bool palRelative;
@@ -107,7 +105,8 @@ namespace Rippix {
             this.picOffset = 0;
             this.picWidth = 16;
             this.picHeight = 16;
-            this.indexBPP = 32;
+            this.colorBPP = 32;
+            this.indexBPP = 8;
             this.palOffset = 0;
             this.palRelative = true;
             this.indexed = false;
@@ -126,6 +125,7 @@ namespace Rippix {
             }
         }
         public int PicHeight { get { return picHeight; } set { SetIntPropertyValue("PicHeight", ref picHeight, value, 1, int.MaxValue, PalRelative); } }
+        public int ColorBPP { get { return colorBPP; } set { SetIntPropertyValue("BPP", ref colorBPP, value, 1, 32, true); } }
         public int PalOffset { get { return palOffset; } set { SetIntPropertyValue("PalOffset", ref palOffset, value, 0, int.MaxValue, true); } }
         public bool Indexed { get { return indexed; } set { indexed = value; palCacheDirty = true; OnChanged("Indexed"); } }
         public bool PalRelative { get { return palRelative; } set { palRelative = value; palCacheDirty = true; OnChanged("PalRelative"); } }
@@ -153,7 +153,7 @@ namespace Rippix {
             OnChanged(name);
         }
         public void SetPacking(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
-            colorFormat.BPP = bpp;
+            ColorBPP = bpp;
             colorFormat.ShiftR = shiftR;
             colorFormat.BitsR = bitsR;
             colorFormat.ShiftG = shiftG;
@@ -164,7 +164,7 @@ namespace Rippix {
             colorFormat.BitsA = bitsA;
         }
         private bool CalcStride(int width) {
-            return CalcStride(width, Indexed ? IndexBPP : ColorFormat.BPP);
+            return CalcStride(width, Indexed ? IndexBPP : ColorBPP);
         }
         private bool CalcStride(int width, int bpp) {
             if (bpp >= 8 || bpp == 4 || bpp == 2 || bpp == 1) {
@@ -188,7 +188,7 @@ namespace Rippix {
                 v = GetValue(loffset, x, IndexBPP);
                 v = LookupPalette(v);
             } else {
-                v = GetValue(loffset, x, colorFormat.BPP);
+                v = GetValue(loffset, x, ColorBPP);
                 v = colorFormat.Decode(v);
             }
             return v;
@@ -203,7 +203,7 @@ namespace Rippix {
                             v = ColorFormat.Pack(v, v, v, 255);
                         }
                     } else {
-                        v = GetValue(GetPalOffset(), i, colorFormat.BPP);
+                        v = GetValue(GetPalOffset(), i, ColorBPP);
                         v = colorFormat.Decode(v);
                     }
                     palCache[i] = v;
