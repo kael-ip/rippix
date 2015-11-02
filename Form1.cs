@@ -18,11 +18,25 @@ namespace Rippix {
             propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
             pixelView1.Format.PropertyChanged += new PropertyChangedEventHandler(Format_PropertyChanged);
             toolTip1.SetToolTip(pixelView1, helpText);
+            CreateFormatMenuItems();
         }
 
         void Format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
+            highlightFormatItem();
+        }
+
+        private void highlightFormatItem() {
+            foreach (var item in formatToolStripMenuItem.DropDownItems) {
+                ToolStripMenuItem menuItem = item as ToolStripMenuItem;
+                if (menuItem != null) {
+                    FormatPreset preset = menuItem.Tag as FormatPreset;
+                    if (preset != null) {
+                        menuItem.Checked = preset.ColorBPP == pixelView1.Format.ColorBPP && Equals(preset.ColorFormat, pixelView1.Format.ColorFormat);
+                    }
+                }
+            }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -43,34 +57,6 @@ namespace Rippix {
             } catch { }
         }
 
-        private void r8G8B8A8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(32, 24, 8, 16, 8, 8, 8, 0, 8);
-        }
-
-        private void b8G8R8A8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(32, 8, 8, 16, 8, 24, 8, 0, 8);
-        }
-
-        private void a8R8G8B8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
-        }
-
-        private void a8B8G8R8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(32, 0, 8, 8, 8, 16, 8, 24, 8);
-        }
-
-        private void a1R5G5B5ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(16, 10, 5, 5, 5, 0, 5, 15, 1);
-        }
-
-        private void r5G6B5ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(16, 11, 5, 5, 6, 0, 5, 0, 0);
-        }
-
-        private void r3G3B2ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(8, 5, 3, 2, 3, 0, 2, 0, 0);
-        }
-
         private void alpha8ToolStripMenuItem_Click(object sender, EventArgs e) {
             pixelView1.Format.ColorFormat.BitsA = 8;
         }
@@ -79,12 +65,44 @@ namespace Rippix {
             pixelView1.Format.ColorFormat.BitsA = 0;
         }
 
-        private void r8G8B8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(24, 16, 8, 8, 8, 0, 8, 24, 0);
+        class FormatPreset {
+            public int ColorBPP { get; private set; }
+            public ColorFormat ColorFormat { get; private set; }
+            public FormatPreset(int bpp, ColorFormat colorFormat) {
+                this.ColorBPP = bpp;
+                this.ColorFormat = colorFormat;
+            }
         }
 
-        private void b8G8R8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.SetPacking(24, 0, 8, 8, 8, 16, 8, 24, 0);
+        private ToolStripItem CreateFormatMenuItem(string name, int bpp, ColorFormat colorFormat) {
+            var item = new ToolStripMenuItem();
+            item.Text = name;
+            item.Tag = new FormatPreset(bpp, colorFormat);
+            item.Click += item_Click;
+            return item;
+        }
+
+        void item_Click(object sender, EventArgs e) {
+            var item = (ToolStripItem)sender;
+            var preset = (FormatPreset)item.Tag;
+            pixelView1.Format.SetPacking(preset.ColorBPP, preset.ColorFormat);
+        }
+
+        private void CreateFormatMenuItems() {
+            var list = new List<ToolStripItem>();
+            list.Add(CreateFormatMenuItem("R8G8B8A8", 32, new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8)));
+            list.Add(CreateFormatMenuItem("B8G8R8A8", 32, new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8)));
+            list.Add(CreateFormatMenuItem("A8R8G8B8", 32, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8)));
+            list.Add(CreateFormatMenuItem("A8B8G8R8", 32, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 8)));
+            list.Add(new ToolStripSeparator());
+            list.Add(CreateFormatMenuItem("A1R5G5B5", 16, new ColorFormat(10, 5, 5, 5, 0, 5, 15, 1)));
+            list.Add(CreateFormatMenuItem("R5G6B5", 16, new ColorFormat(11, 5, 5, 6, 0, 5, 0, 0)));
+            list.Add(new ToolStripSeparator());
+            list.Add(CreateFormatMenuItem("R3G3B2", 8, new ColorFormat(5, 3, 2, 3, 0, 2, 0, 0)));
+            list.Add(new ToolStripSeparator());
+            list.Add(CreateFormatMenuItem("R8G8B8", 24, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
+            list.Add(CreateFormatMenuItem("B8G8R8", 24, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
+            formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
         }
 
         #region

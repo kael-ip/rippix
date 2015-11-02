@@ -28,7 +28,7 @@ namespace Rippix {
 
         public ColorFormat() {
         }
-        public ColorFormat(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
+        public ColorFormat(int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
             this.ShiftR = shiftR;
             this.BitsR = bitsR;
             this.ShiftG = shiftG;
@@ -72,6 +72,17 @@ namespace Rippix {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
         public event PropertyChangedEventHandler PropertyChanged;
+        public override bool Equals(object obj) {
+            if (obj is ColorFormat) {
+                ColorFormat other = (ColorFormat)obj;
+                return (ShiftA == other.ShiftA) && (ShiftR == other.ShiftR) && (ShiftG == other.ShiftG) && (ShiftB == other.ShiftB)
+                    && (BitsA == other.BitsA) && (BitsR == other.BitsR) && (BitsG == other.BitsG) && (BitsB == other.BitsB);
+            }
+            return base.Equals(obj);
+        }
+        public override int GetHashCode() {
+            return (ShiftA + ShiftR + ShiftG + ShiftB) ^ (BitsA + BitsR + BitsG + BitsB);
+        }
     }
 
     public class PictureFormat : INotifyPropertyChanged {
@@ -151,6 +162,9 @@ namespace Rippix {
             store = Math.Max(min, Math.Min(max, value));
             if (makeDirty) palCacheDirty = true;
             OnChanged(name);
+        }
+        public void SetPacking(int bpp, ColorFormat format) {
+            SetPacking(bpp, format.ShiftR, format.BitsR, format.ShiftG, format.BitsG, format.ShiftB, format.BitsB, format.ShiftA, format.BitsA);
         }
         public void SetPacking(int bpp, int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
             ColorBPP = bpp;
