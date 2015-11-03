@@ -17,10 +17,19 @@ namespace Rippix {
         private int zoom;
         public int Zoom { get { return zoom; } set { zoom = Math.Max(0, value); Invalidate(); } }
         private bool isDirty;
-
+        private Color boxBackColor;
+        public Color BoxBackColor {
+            get { return boxBackColor; }
+            set {
+                if (boxBackColor == value) return;
+                boxBackColor = value;
+                Invalidate();
+            }
+        }
         public PixelView() {
             this.SetStyle(ControlStyles.Selectable, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            BoxBackColor = Color.Violet;
             format.PropertyChanged += new PropertyChangedEventHandler(format_PropertyChanged);
         }
         void format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -32,18 +41,20 @@ namespace Rippix {
             //base.OnPaint(e);
             EnsureBitmap();
             if (isDirty) UpdateBitmap();
-            e.Graphics.FillRectangle(new SolidBrush(this.BackColor), new Rectangle(Point.Empty, this.Size));
+            SolidBrush brush = new SolidBrush(this.BackColor);
+            SolidBrush tbrush = new SolidBrush(this.BoxBackColor);
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width * (Zoom + 1), bitmap.Height * (Zoom + 1));
+            e.Graphics.FillRectangle(tbrush, rect);
             //e.Graphics.DrawImageUnscaledAndClipped(bitmap, new Rectangle(Point.Empty, this.Size));
             //e.Graphics.DrawImageUnscaled(bitmap, 0, 0);
             e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            e.Graphics.DrawImage(bitmap, 0, 0, bitmap.Width * (Zoom + 1), bitmap.Height * (Zoom + 1));
-            SolidBrush brush = new SolidBrush(this.BackColor);
-            //if (bitmap.Width < this.Width) {
-            //    e.Graphics.FillRectangle(brush, bitmap.Width, 0, this.Width - bitmap.Width, bitmap.Height);
-            //}
-            //if (bitmap.Height < this.Height) {
-            //    e.Graphics.FillRectangle(brush, 0, bitmap.Height, this.Width, this.Height - bitmap.Height);
-            //}
+            e.Graphics.DrawImage(bitmap, rect);
+            if (rect.Width < this.Width) {
+                e.Graphics.FillRectangle(brush, rect.Width, 0, this.Width - rect.Width, rect.Height);
+            }
+            if (rect.Height < this.Height) {
+                e.Graphics.FillRectangle(brush, 0, rect.Height, this.Width, this.Height - rect.Height);
+            }
         }
         protected override void OnPaintBackground(PaintEventArgs pevent) {
             //base.OnPaintBackground(pevent);
