@@ -29,14 +29,12 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.savePictureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.formatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.alpha8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.alpha0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.propertyGrid2 = new System.Windows.Forms.PropertyGrid();
             this.pixelView1 = new Rippix.PixelView();
+            this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -45,7 +43,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.formatToolStripMenuItem});
+            this.formatToolStripMenuItem,
+            this.colorToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(597, 24);
@@ -77,32 +76,9 @@
             // 
             // formatToolStripMenuItem
             // 
-            this.formatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.alpha8ToolStripMenuItem,
-            this.alpha0ToolStripMenuItem,
-            this.toolStripSeparator2});
             this.formatToolStripMenuItem.Name = "formatToolStripMenuItem";
             this.formatToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
             this.formatToolStripMenuItem.Text = "Format";
-            // 
-            // alpha8ToolStripMenuItem
-            // 
-            this.alpha8ToolStripMenuItem.Name = "alpha8ToolStripMenuItem";
-            this.alpha8ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.alpha8ToolStripMenuItem.Text = "Alpha8";
-            this.alpha8ToolStripMenuItem.Click += new System.EventHandler(this.alpha8ToolStripMenuItem_Click);
-            // 
-            // alpha0ToolStripMenuItem
-            // 
-            this.alpha0ToolStripMenuItem.Name = "alpha0ToolStripMenuItem";
-            this.alpha0ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.alpha0ToolStripMenuItem.Text = "Alpha0";
-            this.alpha0ToolStripMenuItem.Click += new System.EventHandler(this.alpha0ToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // propertyGrid1
             // 
@@ -137,6 +113,7 @@
             // 
             // pixelView1
             // 
+            this.pixelView1.BoxBackColor = System.Drawing.Color.Violet;
             this.pixelView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pixelView1.Location = new System.Drawing.Point(0, 24);
             this.pixelView1.Name = "pixelView1";
@@ -144,6 +121,12 @@
             this.pixelView1.TabIndex = 2;
             this.pixelView1.Text = "pixelView1";
             this.pixelView1.Zoom = 0;
+            // 
+            // colorToolStripMenuItem
+            // 
+            this.colorToolStripMenuItem.Name = "colorToolStripMenuItem";
+            this.colorToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.colorToolStripMenuItem.Text = "Color";
             // 
             // Form1
             // 
@@ -173,12 +156,10 @@
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private PixelView pixelView1;
         private System.Windows.Forms.ToolStripMenuItem formatToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem alpha8ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem alpha0ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.PropertyGrid propertyGrid2;
+        private System.Windows.Forms.ToolStripMenuItem colorToolStripMenuItem;
     }
 }
 

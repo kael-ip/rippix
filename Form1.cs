@@ -19,16 +19,17 @@ namespace Rippix {
             pixelView1.Format.Changed += new EventHandler(Format_Changed);
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
+            CreateColorMenuItems();
         }
 
         void Format_Changed(object sender, EventArgs e) {
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
-            highlightFormatItem();
+            highlightColorItem();
         }
 
-        private void highlightFormatItem() {
-            foreach (var item in formatToolStripMenuItem.DropDownItems) {
+        private void highlightColorItem() {
+            foreach (var item in colorToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
                     FormatPreset preset = menuItem.Tag as FormatPreset;
@@ -49,6 +50,7 @@ namespace Rippix {
                 pixelView1.Format.PicOffset = 0;
                 pixelView1.Format.PicWidth = 8;
                 pixelView1.Format.PicHeight = 8;
+                highlightColorItem();
             } catch { }
         }
 
@@ -91,7 +93,7 @@ namespace Rippix {
             pixelView1.Format.SetPacking(preset.ColorBPP, preset.ColorFormat);
         }
 
-        private void CreateFormatMenuItems() {
+        private void CreateColorMenuItems() {
             var list = new List<ToolStripItem>();
             list.Add(CreateFormatMenuItem("R8G8B8A8", 32, new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8)));
             list.Add(CreateFormatMenuItem("B8G8R8A8", 32, new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8)));
@@ -105,7 +107,10 @@ namespace Rippix {
             list.Add(new ToolStripSeparator());
             list.Add(CreateFormatMenuItem("R8G8B8", 24, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
             list.Add(CreateFormatMenuItem("B8G8R8", 24, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
-            formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
+            colorToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
+        }
+
+        private void CreateFormatMenuItems() {
         }
 
         #region
