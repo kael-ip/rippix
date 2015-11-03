@@ -24,6 +24,7 @@ namespace Rippix {
                 if (format != null) {
                     format.Changed += format_Changed;
                 }
+                format_Changed(null, EventArgs.Empty);
             }
         }
         private int zoom;
@@ -130,7 +131,7 @@ namespace Rippix {
         }
         protected override void OnKeyDown(KeyEventArgs e) {
             base.OnKeyDown(e);
-            if (Format == null) return;
+            if (Format == null || Format.Data == null) return;
             int step = e.Control ? 8 : 1;
             CorrectOffset(0);
             int oldOffset = format.PicOffset;

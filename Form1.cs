@@ -29,6 +29,7 @@ namespace Rippix {
                 pixelView1.Format.Changed += new EventHandler(Format_Changed);
                 propertyGrid1.SelectedObject = pixelView1.Format;
                 propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
+                Format_Changed(pixelView1.Format, EventArgs.Empty);
             }
         }
 
@@ -124,14 +125,15 @@ namespace Rippix {
                 item.Text = "Original";
                 item.Click += delegate {
                     var old = pixelView1.Format;
-                    pixelView1.Format = new PictureFormat();
+                    IPictureDecoder format = new PictureFormat();
                     if (old != null) {
-                        pixelView1.Format.Data = old.Data;
-                        pixelView1.Format.PicOffset = old.PicOffset;
-                        pixelView1.Format.PicWidth = old.PicWidth;
-                        pixelView1.Format.PicHeight = old.PicHeight;
-                        pixelView1.Format.ColorBPP = old.ColorBPP;
+                        format.Data = old.Data;
+                        format.PicOffset = old.PicOffset;
+                        format.PicWidth = old.PicWidth;
+                        format.PicHeight = old.PicHeight;
+                        format.ColorBPP = old.ColorBPP;
                     };
+                    setPictureDecoder(format);
                 };
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
@@ -140,14 +142,15 @@ namespace Rippix {
                 item.Text = "Amiga4";
                 item.Click += delegate {
                     var old = pixelView1.Format;
-                    pixelView1.Format = new TestPictureDecoder();
+                    IPictureDecoder format = new TestPictureDecoder();
                     if (old != null) {
-                        pixelView1.Format.Data = old.Data;
-                        pixelView1.Format.PicOffset = old.PicOffset;
-                        pixelView1.Format.PicWidth = old.PicWidth;
-                        pixelView1.Format.PicHeight = old.PicHeight;
-                        pixelView1.Format.ColorBPP = old.ColorBPP;
+                        format.Data = old.Data;
+                        format.PicOffset = old.PicOffset;
+                        format.PicWidth = old.PicWidth;
+                        format.PicHeight = old.PicHeight;
+                        format.ColorBPP = old.ColorBPP;
                     };
+                    setPictureDecoder(format);
                 };
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
