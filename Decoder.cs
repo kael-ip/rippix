@@ -312,9 +312,10 @@ namespace Rippix {
         //}
         //public int PicHeight { get { return picHeight; } set { SetIntPropertyValue("PicHeight", ref picHeight, value, 1, int.MaxValue, PalRelative); } }
         //public int ColorBPP { get { return colorBPP; } set { SetIntPropertyValue("BPP", ref colorBPP, value, 1, 32, true); } }
+        private int PlanesCount = 4;
         public int PicWidth { get { return 320; } set { } }
         public int PicHeight { get { return 200; } set { } }
-        public int PicStride { get { return 320 / 8 * 4; } }
+        public int PicStride { get { return PicWidth / 8 * PlanesCount; } }
         public void SetPacking(int bpp, ColorFormat colorFormat) {
         }
         public int ColorBPP { get { return 24; } set { } }
@@ -323,11 +324,14 @@ namespace Rippix {
             int o = PicOffset + y * PicStride;
             int xby = x >> 3;
             int xbi = 7 - (x & 7);
-            int p0 = (GetData(o + xby) >> xbi) & 1;
-            int p1 = ((GetData(o + xby + 40) >> xbi) & 1) << 1;
-            int p2 = ((GetData(o + xby + 80) >> xbi) & 1) << 2;
-            int p3 = ((GetData(o + xby + 120) >> xbi) & 1) << 3;
-            int v = (p0 | p1 | p2 | p3) * 255 / 15;
+            int v = 0;
+            o = o + xby;
+            for (int i = 0; i < PlanesCount; i++) {
+                int p = ((GetData(o) >> xbi) & 1) << i;
+                v = v | p;
+                o = o + (PicWidth / 8);
+            }
+            v = v * 255 / ((1 << PlanesCount) - 1);
             return ColorFormat.Pack(v, v, v, 255);
         }
         private byte GetData(int offset) {
