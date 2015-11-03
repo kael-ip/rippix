@@ -14,12 +14,22 @@ namespace Rippix {
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.ClientSize = new Size(800, 600);
             propertyGrid1.Height = 300;
-            propertyGrid1.SelectedObject = pixelView1.Format;
-            propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
-            pixelView1.Format.Changed += new EventHandler(Format_Changed);
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
             CreateColorMenuItems();
+            //setPictureDecoder(new PictureFormat());
+        }
+
+        void setPictureDecoder(IPictureDecoder decoder) {
+            if (pixelView1.Format != null) {
+                pixelView1.Format.Changed -= new EventHandler(Format_Changed);
+            }
+            pixelView1.Format = decoder;
+            if (pixelView1.Format != null) {
+                pixelView1.Format.Changed += new EventHandler(Format_Changed);
+                propertyGrid1.SelectedObject = pixelView1.Format;
+                propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
+            }
         }
 
         void Format_Changed(object sender, EventArgs e) {
@@ -34,7 +44,9 @@ namespace Rippix {
                 if (menuItem != null) {
                     FormatPreset preset = menuItem.Tag as FormatPreset;
                     if (preset != null) {
-                        menuItem.Checked = preset.ColorBPP == pixelView1.Format.ColorBPP && Equals(preset.ColorFormat, pixelView1.Format.ColorFormat);
+                        menuItem.Checked = (pixelView1.Format != null)
+                        && preset.ColorBPP == pixelView1.Format.ColorBPP
+                        && Equals(preset.ColorFormat, pixelView1.Format.ColorFormat);
                     }
                 }
             }
@@ -46,6 +58,9 @@ namespace Rippix {
             try {
                 byte[] data = System.IO.File.ReadAllBytes(dlg.FileName);
                 //pixelView1.Format.Reset();
+                if (pixelView1.Format == null) {
+                    setPictureDecoder(new PictureFormat());
+                }
                 pixelView1.Format.Data = data;
                 pixelView1.Format.PicOffset = 0;
                 pixelView1.Format.PicWidth = 8;
@@ -60,14 +75,6 @@ namespace Rippix {
             try {
                 pixelView1.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
             } catch { }
-        }
-
-        private void alpha8ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.ColorFormat.BitsA = 8;
-        }
-
-        private void alpha0ToolStripMenuItem_Click(object sender, EventArgs e) {
-            pixelView1.Format.ColorFormat.BitsA = 0;
         }
 
         class FormatPreset {
@@ -90,6 +97,7 @@ namespace Rippix {
         void item_Click(object sender, EventArgs e) {
             var item = (ToolStripItem)sender;
             var preset = (FormatPreset)item.Tag;
+            if (pixelView1.Format == null) return;
             pixelView1.Format.SetPacking(preset.ColorBPP, preset.ColorFormat);
         }
 
@@ -111,6 +119,38 @@ namespace Rippix {
         }
 
         private void CreateFormatMenuItems() {
+            {
+                var item = new ToolStripMenuItem();
+                item.Text = "Original";
+                item.Click += delegate {
+                    var old = pixelView1.Format;
+                    pixelView1.Format = new PictureFormat();
+                    if (old != null) {
+                        pixelView1.Format.Data = old.Data;
+                        pixelView1.Format.PicOffset = old.PicOffset;
+                        pixelView1.Format.PicWidth = old.PicWidth;
+                        pixelView1.Format.PicHeight = old.PicHeight;
+                        pixelView1.Format.ColorBPP = old.ColorBPP;
+                    };
+                };
+                formatToolStripMenuItem.DropDownItems.Add(item);
+            }
+            {
+                var item = new ToolStripMenuItem();
+                item.Text = "Amiga4";
+                item.Click += delegate {
+                    var old = pixelView1.Format;
+                    pixelView1.Format = new TestPictureDecoder();
+                    if (old != null) {
+                        pixelView1.Format.Data = old.Data;
+                        pixelView1.Format.PicOffset = old.PicOffset;
+                        pixelView1.Format.PicWidth = old.PicWidth;
+                        pixelView1.Format.PicHeight = old.PicHeight;
+                        pixelView1.Format.ColorBPP = old.ColorBPP;
+                    };
+                };
+                formatToolStripMenuItem.DropDownItems.Add(item);
+            }
         }
 
         #region

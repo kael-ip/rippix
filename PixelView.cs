@@ -11,9 +11,21 @@ namespace Rippix {
 
     public class PixelView : Control{
         private Bitmap bitmap;
-        private IPictureDecoder format = new PictureFormat();
+        private IPictureDecoder format;
         public Bitmap Bitmap { get { return bitmap; } }
-        public IPictureDecoder Format { get { return format; } }
+        public IPictureDecoder Format {
+            get { return format; }
+            set {
+                if (Equals( format,value)) return;
+                if (format != null) {
+                    format.Changed -= format_Changed;
+                }
+                format = value;
+                if (format != null) {
+                    format.Changed += format_Changed;
+                }
+            }
+        }
         private int zoom;
         public int Zoom { get { return zoom; } set { zoom = Math.Max(0, value); Invalidate(); } }
         private bool isDirty;
@@ -30,7 +42,6 @@ namespace Rippix {
             this.SetStyle(ControlStyles.Selectable, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             BoxBackColor = Color.Violet;
-            format.Changed += format_Changed;
         }
         void format_Changed(object sender, EventArgs e) {
             isDirty = true;
@@ -38,16 +49,19 @@ namespace Rippix {
         }
         protected override void OnPaint(PaintEventArgs e) {
             //base.OnPaint(e);
-            EnsureBitmap();
-            if (isDirty) UpdateBitmap();
             SolidBrush brush = new SolidBrush(this.BackColor);
-            SolidBrush tbrush = new SolidBrush(this.BoxBackColor);
-            Rectangle rect = new Rectangle(0, 0, bitmap.Width * (Zoom + 1), bitmap.Height * (Zoom + 1));
-            e.Graphics.FillRectangle(tbrush, rect);
-            //e.Graphics.DrawImageUnscaledAndClipped(bitmap, new Rectangle(Point.Empty, this.Size));
-            //e.Graphics.DrawImageUnscaled(bitmap, 0, 0);
-            e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            e.Graphics.DrawImage(bitmap, rect);
+            Rectangle rect = Rectangle.Empty;
+            if (Format != null) {
+                EnsureBitmap();
+                if (isDirty) UpdateBitmap();
+                SolidBrush tbrush = new SolidBrush(this.BoxBackColor);
+                rect = new Rectangle(0, 0, bitmap.Width * (Zoom + 1), bitmap.Height * (Zoom + 1));
+                e.Graphics.FillRectangle(tbrush, rect);
+                //e.Graphics.DrawImageUnscaledAndClipped(bitmap, new Rectangle(Point.Empty, this.Size));
+                //e.Graphics.DrawImageUnscaled(bitmap, 0, 0);
+                e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                e.Graphics.DrawImage(bitmap, rect);
+            }
             if (rect.Width < this.Width) {
                 e.Graphics.FillRectangle(brush, rect.Width, 0, this.Width - rect.Width, rect.Height);
             }
@@ -67,12 +81,12 @@ namespace Rippix {
         int[] lineBuffer;
         long[] timings = new long[100];
         private void UpdateBitmap() {
+            if (Format == null || Format.Data == null) return;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             timings[0] = sw.ElapsedTicks;
             EnsureBitmap();
             timings[1] = sw.ElapsedTicks;
-            if (Format.Data == null) return;
             System.Drawing.Imaging.BitmapData bits = bitmap.LockBits(new Rectangle(Point.Empty, bitmap.Size), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
             timings[2] = sw.ElapsedTicks;
             EnsureLineBuffer(bits.Width);
@@ -115,8 +129,9 @@ namespace Rippix {
             return base.IsInputKey(keyData);
         }
         protected override void OnKeyDown(KeyEventArgs e) {
-            int step = e.Control ? 8 : 1;
             base.OnKeyDown(e);
+            if (Format == null) return;
+            int step = e.Control ? 8 : 1;
             CorrectOffset(0);
             int oldOffset = format.PicOffset;
             if (e.Shift) {

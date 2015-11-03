@@ -28,7 +28,7 @@ namespace Rippix {
         int PicWidth { get; set; }
         int PicHeight { get; set; }
         int PicStride { get; }
-        int GetRGBAColor(int scanline, int i);
+        int GetRGBAColor(int y, int x);
         void SetPacking(int bpp, ColorFormat colorFormat);
         int ColorBPP { get; set; }
         ColorFormat ColorFormat { get; }
@@ -276,6 +276,69 @@ namespace Rippix {
             } else {
                 return PalOffset;
             }
+        }
+        private void OnChanged(string propertyName) {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            if (Changed != null) Changed(this, EventArgs.Empty);
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler Changed;
+    }
+
+    public class TestPictureDecoder : IPictureDecoder, INotifyPropertyChanged {
+        private byte[] data;
+        private int picOffset;
+        //private int picStride;
+        //private int picWidth;
+        //private int picHeight;
+        //private int colorBPP;
+        //private int indexBPP;
+        //private int palOffset;
+        //private bool palRelative;
+        //private bool indexed;
+        private int[] palCache;
+        //private bool palCacheDirty;
+        private ColorFormat colorFormat;
+        //private bool isFixedPalette;
+        [Browsable(false)]
+        public byte[] Data { get { return data; } set { data = value; OnChanged("Data"); } }
+        public int PicOffset { get { return picOffset; } set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue, false); } }
+        //public int PicStride { get { return picStride; } private set { picStride = Math.Max(1, value); OnChanged("PicStride"); } }
+        //public int PicWidth {
+        //    get { return picWidth; }
+        //    set {
+        //        if (CalcStride(Math.Max(1, value))) { SetIntPropertyValue("PicWidth", ref picWidth, value, 1, int.MaxValue, PalRelative); }
+        //    }
+        //}
+        //public int PicHeight { get { return picHeight; } set { SetIntPropertyValue("PicHeight", ref picHeight, value, 1, int.MaxValue, PalRelative); } }
+        //public int ColorBPP { get { return colorBPP; } set { SetIntPropertyValue("BPP", ref colorBPP, value, 1, 32, true); } }
+        public int PicWidth { get { return 320; } set { } }
+        public int PicHeight { get { return 200; } set { } }
+        public int PicStride { get { return 320 / 8 * 4; } }
+        public void SetPacking(int bpp, ColorFormat colorFormat) {
+        }
+        public int ColorBPP { get { return 24; } set { } }
+        public ColorFormat ColorFormat { get { return colorFormat; } }
+        public int GetRGBAColor(int y, int x) {
+            int o = PicOffset + y * PicStride;
+            int xby = x >> 3;
+            int xbi = 7 - (x & 7);
+            int p0 = (GetData(o + xby) >> xbi) & 1;
+            int p1 = ((GetData(o + xby + 40) >> xbi) & 1) << 1;
+            int p2 = ((GetData(o + xby + 80) >> xbi) & 1) << 2;
+            int p3 = ((GetData(o + xby + 120) >> xbi) & 1) << 3;
+            int v = (p0 | p1 | p2 | p3) * 255 / 15;
+            return ColorFormat.Pack(v, v, v, 255);
+        }
+        private byte GetData(int offset) {
+            if (offset < 0 || offset >= Data.Length) return 0;
+            return Data[offset];
+        }
+        private void SetIntPropertyValue(string name, ref int store, int value, int min, int max, bool makeDirty) {
+            if (value == store) return;
+            store = Math.Max(min, Math.Min(max, value));
+            //if (makeDirty) palCacheDirty = true;
+            OnChanged(name);
         }
         private void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
