@@ -16,12 +16,12 @@ namespace Rippix {
             propertyGrid1.Height = 300;
             propertyGrid1.SelectedObject = pixelView1.Format;
             propertyGrid2.SelectedObject = pixelView1.Format.ColorFormat;
-            pixelView1.Format.PropertyChanged += new PropertyChangedEventHandler(Format_PropertyChanged);
+            pixelView1.Format.Changed += new EventHandler(Format_Changed);
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
         }
 
-        void Format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+        void Format_Changed(object sender, EventArgs e) {
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
             highlightFormatItem();
@@ -44,8 +44,11 @@ namespace Rippix {
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try {
                 byte[] data = System.IO.File.ReadAllBytes(dlg.FileName);
-                pixelView1.Format.Reset();
+                //pixelView1.Format.Reset();
                 pixelView1.Format.Data = data;
+                pixelView1.Format.PicOffset = 0;
+                pixelView1.Format.PicWidth = 8;
+                pixelView1.Format.PicHeight = 8;
             } catch { }
         }
 

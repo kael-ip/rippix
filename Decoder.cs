@@ -22,6 +22,19 @@ namespace Rippix {
     //TODO: bitplanes
     //TODO: exotic modes
 
+    public interface IPictureDecoder {
+        event EventHandler Changed;
+        int PicOffset { get; set; }
+        int PicWidth { get; set; }
+        int PicHeight { get; set; }
+        int PicStride { get; }
+        int GetRGBAColor(int scanline, int i);
+        void SetPacking(int bpp, ColorFormat colorFormat);
+        int ColorBPP { get; set; }
+        ColorFormat ColorFormat { get; }
+        byte[] Data { get; set; }
+    }
+
     public class ColorFormat : INotifyPropertyChanged {
         private int shiftR, shiftG, shiftB, shiftA;
         private int bitsR, bitsG, bitsB, bitsA;
@@ -85,7 +98,7 @@ namespace Rippix {
         }
     }
 
-    public class PictureFormat : INotifyPropertyChanged {
+    public class PictureFormat : INotifyPropertyChanged, IPictureDecoder {
         private byte[] data;
         private int picOffset;
         private int picStride;
@@ -189,9 +202,6 @@ namespace Rippix {
             }
             return false;
         }
-        public System.Drawing.Size GetBitmapSize() {
-            return new Size(PicWidth, picHeight);
-        }
         private int GetPictureLength() {
             return PicHeight * PicStride;
         }
@@ -269,7 +279,9 @@ namespace Rippix {
         }
         private void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            if (Changed != null) Changed(this, EventArgs.Empty);
         }
         public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler Changed;
     }
 }

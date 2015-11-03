@@ -11,9 +11,9 @@ namespace Rippix {
 
     public class PixelView : Control{
         private Bitmap bitmap;
-        private PictureFormat format = new PictureFormat();
+        private IPictureDecoder format = new PictureFormat();
         public Bitmap Bitmap { get { return bitmap; } }
-        public PictureFormat Format { get { return format; } }
+        public IPictureDecoder Format { get { return format; } }
         private int zoom;
         public int Zoom { get { return zoom; } set { zoom = Math.Max(0, value); Invalidate(); } }
         private bool isDirty;
@@ -30,10 +30,9 @@ namespace Rippix {
             this.SetStyle(ControlStyles.Selectable, true);
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             BoxBackColor = Color.Violet;
-            format.PropertyChanged += new PropertyChangedEventHandler(format_PropertyChanged);
+            format.Changed += format_Changed;
         }
-        void format_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            //UpdateBitmap();
+        void format_Changed(object sender, EventArgs e) {
             isDirty = true;
             Invalidate();
         }
@@ -60,7 +59,7 @@ namespace Rippix {
             //base.OnPaintBackground(pevent);
         }
         private void EnsureBitmap() {
-            Size sz = Format.GetBitmapSize();
+            Size sz = new Size(Format.PicWidth, Format.PicHeight);
             if (bitmap == null || bitmap.Size != sz) {
                 bitmap = new Bitmap(sz.Width, sz.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
@@ -118,6 +117,8 @@ namespace Rippix {
         protected override void OnKeyDown(KeyEventArgs e) {
             int step = e.Control ? 8 : 1;
             base.OnKeyDown(e);
+            CorrectOffset(0);
+            int oldOffset = format.PicOffset;
             if (e.Shift) {
                 switch (e.KeyCode) {
                     case Keys.Up:
@@ -174,6 +175,12 @@ namespace Rippix {
                         this.Zoom++;
                         break;
                 }
+            }
+            CorrectOffset(oldOffset);
+        }
+        private void CorrectOffset(int oldOffset) {
+            if (format.PicOffset < 0 || format.PicOffset >= format.Data.Length) {
+                format.PicOffset = oldOffset;
             }
         }
         protected override void OnMouseDown(MouseEventArgs e) {
