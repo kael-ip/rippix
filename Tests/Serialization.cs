@@ -8,9 +8,10 @@ using System.Text;
 namespace Rippix.Tests {
     public class SerializationTests {
         [Test]
-        public void Test1() {
+        public void TestSerializeDeserialize() {
             var m = new Model.Document();
             m.FileName = "xxx";
+            m.SHA1 = "0123456789abcdef";
             var f1 = new Model.Format() {
                 Code = "P4"
             };
@@ -38,6 +39,10 @@ namespace Rippix.Tests {
                     Assert.AreEqual(mr.Format.Parameters[j].Value, zmr.Format.Parameters[j].Value);
                 }
             }
+        }
+        [Test]
+        public void TestConvertToBase16() {
+            Assert.AreEqual("123456789abcde", Rippix.Model.Helper.ConvertToBase16(new byte[] { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde }));
         }
     }
 }
