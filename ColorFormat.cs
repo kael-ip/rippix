@@ -9,6 +9,9 @@ namespace Rippix {
 
         public ColorFormat() {
         }
+        public ColorFormat(int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB)
+            : this(shiftR, bitsR, shiftG, bitsG, shiftB, bitsB, 0, 0) {
+        }
         public ColorFormat(int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB, int shiftA, int bitsA) {
             this.ShiftR = shiftR;
             this.BitsR = bitsR;
@@ -42,10 +45,10 @@ namespace Rippix {
             int cg = ((v >> ShiftG) & ((1 << BitsG) - 1)) * 255 / ((1 << BitsG) - 1);
             int cb = ((v >> ShiftB) & ((1 << BitsB) - 1)) * 255 / ((1 << BitsB) - 1);
             if (BitsA == 0) {
-                v = Pack(cr, cg, cb, 255);
+                v = Pack(cb, cg, cr, 255);
             } else {
                 int ca = ((v >> ShiftA) & ((1 << BitsA) - 1)) * 255 / ((1 << BitsA) - 1);
-                v = Pack(cr, cg, cb, ca);
+                v = Pack(cb, cg, cr, ca);
             }
             return v;
         }
@@ -65,27 +68,27 @@ namespace Rippix {
             return (ShiftA + ShiftR + ShiftG + ShiftB) ^ (BitsA + BitsR + BitsG + BitsB);
         }
         public override string ToString() {
-            return string.Concat("S", string.Join(",", ComponentToString(ShiftR, BitsR), ComponentToString(ShiftG, BitsG), ComponentToString(ShiftB, BitsB), ComponentToString(ShiftA, BitsA)));
+            return string.Concat("S", string.Join(",", ComponentToString(ShiftA, BitsA), ComponentToString(ShiftR, BitsR), ComponentToString(ShiftG, BitsG), ComponentToString(ShiftB, BitsB)));
         }
         private static string ComponentToString(int shift, int bits) {
-            return string.Format("{0}:{1}", bits, shift);
+            return string.Format("{0}:{1}", shift, bits);
         }
         public ColorFormat(string code) {
             if (code == null) throw new ArgumentNullException();
             if (!code.StartsWith("S")) throw new ArgumentException();
             var components = code.Substring(1).Split(',');
             if (components == null || components.Length != 4) throw new ArgumentException();
-            Decode(components[0], out shiftR, out bitsR);
-            Decode(components[1], out shiftG, out bitsG);
-            Decode(components[2], out shiftB, out bitsB);
-            Decode(components[3], out shiftA, out bitsA);
+            Decode(components[0], out shiftA, out bitsA);
+            Decode(components[1], out shiftR, out bitsR);
+            Decode(components[2], out shiftG, out bitsG);
+            Decode(components[3], out shiftB, out bitsB);
         }
         private void Decode(string code, out int shift, out int bits) {
             if (string.IsNullOrEmpty(code)) throw new ArgumentException();
             var pair = code.Split(':');
             if (pair == null || pair.Length != 2) throw new ArgumentException();
-            bits = Int32.Parse(pair[0]);
-            shift = Int32.Parse(pair[1]);
+            bits = Int32.Parse(pair[1]);
+            shift = Int32.Parse(pair[0]);
             if (shift < 0 || shift >= 32 || bits < 0 || bits > 16) throw new ArgumentOutOfRangeException();
         }
     }
