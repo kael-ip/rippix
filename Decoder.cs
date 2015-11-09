@@ -22,11 +22,10 @@ namespace Rippix {
 
     public interface IPictureFormatImpl {
         event EventHandler Changed;
-        int PicOffset { get; set; }
         int PicStride { get; }
         int PicWidth { get; set; }
         int PicHeight { get; set; }
-        int GetARGBColor(byte[] data, int y, int x);
+        int GetARGBColor(byte[] data, int offset, int y, int x);
         void SetPacking(int bpp, ColorFormat colorFormat);
         int ColorBPP { get; set; }
         ColorFormat ColorFormat { get; }
@@ -64,10 +63,7 @@ namespace Rippix {
         }
         public int PicOffset {
             get { return picOffset; }
-            set {
-                Decoder.PicOffset = value;
-                SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue);
-            }
+            set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue); }
         }
         public int PicStride {
             get { return decoder.PicStride; }
@@ -81,7 +77,7 @@ namespace Rippix {
             set { decoder.PicHeight = value; }
         }
         public int GetARGBColor(int y, int x) {
-            return decoder.GetARGBColor(Data, y, x);
+            return decoder.GetARGBColor(Data, PicOffset, y, x);
         }
         private void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
             if (value == store) return;
@@ -97,7 +93,6 @@ namespace Rippix {
     }
 
     public class DirectPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
-        private int picOffset;
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -113,13 +108,11 @@ namespace Rippix {
             OnChanged("ColorFormat." + e.PropertyName);
         }
         public void Reset() {
-            this.picOffset = 0;
             this.picWidth = 16;
             this.picHeight = 16;
             this.colorBPP = 32;
             SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
-        public int PicOffset { get { return picOffset; } set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue); } }
         public int PicStride { get { return picStride; } private set { picStride = Math.Max(1, value); OnChanged("PicStride"); } }
         public int PicWidth {
             get { return picWidth; }
@@ -165,8 +158,8 @@ namespace Rippix {
         private int GetPictureLength() {
             return PicHeight * PicStride;
         }
-        public int GetARGBColor(byte[] data, int y, int x) {
-            int loffset = PicOffset + (y * PicStride);
+        public int GetARGBColor(byte[] data, int offset, int y, int x) {
+            int loffset = offset + (y * PicStride);
             int v;
             v = GetValue(data, loffset, x, ColorBPP);
             v = colorFormat.Decode(v);
@@ -212,7 +205,6 @@ namespace Rippix {
     }
 
     public class IndexedPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
-        private int picOffset;
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -236,7 +228,6 @@ namespace Rippix {
             OnChanged("ColorFormat." + e.PropertyName);
         }
         public void Reset() {
-            this.picOffset = 0;
             this.picWidth = 16;
             this.picHeight = 16;
             this.colorBPP = 32;
@@ -247,7 +238,6 @@ namespace Rippix {
             this.isFixedPalette = true;
             SetPacking(32, 16, 8, 8, 8, 0, 8, 24, 8);
         }
-        public int PicOffset { get { return picOffset; } set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue, PalRelative); } }
         public int PicStride { get { return picStride; } private set { picStride = Math.Max(1, value); OnChanged("PicStride"); } }
         public int PicWidth {
             get { return picWidth; }
@@ -311,14 +301,14 @@ namespace Rippix {
         private int GetPictureLength() {
             return PicHeight * PicStride;
         }
-        public int GetARGBColor(byte[] data, int y, int x) {
-            int loffset = PicOffset + (y * PicStride);
+        public int GetARGBColor(byte[] data, int offset, int y, int x) {
+            int loffset = offset + (y * PicStride);
             int v;
             v = GetValue(data, loffset, x, IndexBPP);
-            v = LookupPalette(data, v);
+            v = LookupPalette(data, offset, v);
             return v;
         }
-        private int LookupPalette(byte[] data, int c) {
+        private int LookupPalette(byte[] data, int offset, int c) {
             if (palCacheDirty) {
                 for (int i = 0; i <= 255; i++) {
                     int v = 0;
@@ -328,7 +318,7 @@ namespace Rippix {
                             v = ColorFormat.Pack(v, v, v, 255);
                         }
                     } else {
-                        v = GetValue(data, GetPalOffset(), i, ColorBPP);
+                        v = GetValue(data, GetPalOffset(offset), i, ColorBPP);
                         v = colorFormat.Decode(v);
                     }
                     palCache[i] = v;
@@ -371,9 +361,9 @@ namespace Rippix {
             }
             return v;
         }
-        private int GetPalOffset() {
+        private int GetPalOffset(int offset) {
             if (palRelative) {
-                return PicOffset + GetPictureLength() + PalOffset;
+                return offset + GetPictureLength() + PalOffset;
             } else {
                 return PalOffset;
             }
@@ -387,29 +377,8 @@ namespace Rippix {
     }
 
     public class TestPictureDecoder : IPictureFormatImpl, INotifyPropertyChanged {
-        private int picOffset;
-        //private int picStride;
-        //private int picWidth;
-        //private int picHeight;
-        //private int colorBPP;
-        //private int indexBPP;
-        //private int palOffset;
-        //private bool palRelative;
-        //private bool indexed;
         private int[] palCache;
-        //private bool palCacheDirty;
         private ColorFormat colorFormat;
-        //private bool isFixedPalette;
-        public int PicOffset { get { return picOffset; } set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue, false); } }
-        //public int PicStride { get { return picStride; } private set { picStride = Math.Max(1, value); OnChanged("PicStride"); } }
-        //public int PicWidth {
-        //    get { return picWidth; }
-        //    set {
-        //        if (CalcStride(Math.Max(1, value))) { SetIntPropertyValue("PicWidth", ref picWidth, value, 1, int.MaxValue, PalRelative); }
-        //    }
-        //}
-        //public int PicHeight { get { return picHeight; } set { SetIntPropertyValue("PicHeight", ref picHeight, value, 1, int.MaxValue, PalRelative); } }
-        //public int ColorBPP { get { return colorBPP; } set { SetIntPropertyValue("BPP", ref colorBPP, value, 1, 32, true); } }
         private int PlanesCount = 4;
         public int PicWidth { get { return 320; } set { } }
         public int PicHeight { get { return 200; } set { } }
@@ -418,8 +387,8 @@ namespace Rippix {
         }
         public int ColorBPP { get { return 24; } set { } }
         public ColorFormat ColorFormat { get { return colorFormat; } }
-        public int GetARGBColor(byte[] data, int y, int x) {
-            int o = PicOffset + y * PicStride;
+        public int GetARGBColor(byte[] data, int offset, int y, int x) {
+            int o = offset + y * PicStride;
             int xby = x >> 3;
             int xbi = 7 - (x & 7);
             int v = 0;
