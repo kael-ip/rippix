@@ -14,3 +14,22 @@ TODO:
 .Fixed palettes
 .Fixed palettes save and load
 .Pan h&v per pixel, not per byte (as an option in multibyte packing modes)
+
+    /*
+     * Modes:
+     * - Raw RGBA (32/24/16/8 bpp, different orders)
+     * - Indexed with palette
+     * -- packed (8/4/2/1 bpp)
+     * -- planes (1..8)
+     * 
+     * 
+     * Direct/Indexed
+     * bpp (32/24/16/8/4/2/1)
+     * planes
+     */
+
+    //TODO: fixed palettes
+    //+TODO: optimize / native impl
+    //TODO: bitplanes
+    //TODO: exotic modes
+

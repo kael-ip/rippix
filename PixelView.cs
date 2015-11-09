@@ -6,14 +6,22 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using Rippix.Model;
 
 namespace Rippix {
 
     public class PixelView : Control{
-        private Bitmap bitmap;
-        private IPictureDecoder format;
-        public Bitmap Bitmap { get { return bitmap; } }
-        public IPictureDecoder Format {
+        private byte[] data;
+        public byte[] Data {
+            get { return data; }
+            set {
+                if (data == value) return;
+                data = value;
+                format_Changed(null, EventArgs.Empty);
+            }
+        }
+        private IPictureAdapter format;
+        public IPictureAdapter Format {
             get { return format; }
             set {
                 if (Equals( format,value)) return;
@@ -29,6 +37,8 @@ namespace Rippix {
         }
         private int zoom;
         public int Zoom { get { return zoom; } set { zoom = Math.Max(0, value); Invalidate(); } }
+        private Bitmap bitmap;
+        public Bitmap Bitmap { get { return bitmap; } }
         private bool isDirty;
         private Color boxBackColor;
         public Color BoxBackColor {
@@ -82,7 +92,7 @@ namespace Rippix {
         int[] lineBuffer;
         long[] timings = new long[100];
         private void UpdateBitmap() {
-            if (Format == null || Format.Data == null) return;
+            if (Format == null || Data == null) return;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             timings[0] = sw.ElapsedTicks;
@@ -119,7 +129,7 @@ namespace Rippix {
         }
         private void RenderScanLine(int[] lineBuffer, int scanline) {
             for (int i = 0; i < lineBuffer.Length; i++) {
-                lineBuffer[i] = Format.GetRGBAColor(scanline, i);
+                lineBuffer[i] = Format.GetARGBColor(Data, scanline, i);
             }
         }
         protected override bool IsInputKey(Keys keyData) {
@@ -131,7 +141,7 @@ namespace Rippix {
         }
         protected override void OnKeyDown(KeyEventArgs e) {
             base.OnKeyDown(e);
-            if (Format == null || Format.Data == null) return;
+            if (Format == null || Data == null) return;
             int step = e.Control ? 8 : 1;
             CorrectOffset(0);
             int oldOffset = format.PicOffset;
@@ -195,7 +205,7 @@ namespace Rippix {
             CorrectOffset(oldOffset);
         }
         private void CorrectOffset(int oldOffset) {
-            if (format.PicOffset < 0 || format.PicOffset >= format.Data.Length) {
+            if (format.PicOffset < 0 || format.PicOffset >= Data.Length) {
                 format.PicOffset = oldOffset;
             }
         }

@@ -10,6 +10,8 @@ namespace Rippix.Tests {
             var color = Color.FromArgb(0x12, 0x34, 0x56, 0x78);//ARGB
             var cf = new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8);
             Assert.AreEqual(color.ToArgb(), cf.Decode(color.ToArgb()));
+            Assert.AreEqual(0x34, (color.ToArgb() >> 16) & 0xff);
+            Assert.AreEqual(0x12, (color.ToArgb() >> 24) & 0xff);
         }
         [Test]
         public void TestDecode() {

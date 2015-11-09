@@ -113,6 +113,13 @@ namespace Rippix.Model {
         void WriteParameters(IList<Parameter> parameters);
     }
 
+    public interface IPictureDecoder : IDecoder {
+        int ImageWidth { get; }
+        int ImageHeight { get; }
+        int Stride { get; }
+        int GetARGB(byte[] data, int offset, int x, int y);
+    }
+
     public class DecoderFactory {
         private static DecoderFactory instance;
         public static DecoderFactory Instance {
