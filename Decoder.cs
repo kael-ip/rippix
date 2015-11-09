@@ -1,5 +1,4 @@
-﻿using Rippix.Model;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -7,12 +6,12 @@ namespace Rippix {
 
     public interface IPictureAdapter {
         event EventHandler Changed;
-        //byte[] Data { get; set; }
+        byte[] Data { get; set; }
         int PicOffset { get; set; }
         int PicStride { get; }
         int PicWidth { get; set; }
         int PicHeight { get; set; }
-        int GetARGBColor(byte[] data, int y, int x);
+        int GetARGBColor(int y, int x);
     }
 
     public interface IPictureFormat : IPictureAdapter {
@@ -21,7 +20,83 @@ namespace Rippix {
         ColorFormat ColorFormat { get; }
     }
 
-    public class DirectPictureFormat : INotifyPropertyChanged, IPictureFormat {
+    public interface IPictureFormatImpl {
+        event EventHandler Changed;
+        int PicOffset { get; set; }
+        int PicStride { get; }
+        int PicWidth { get; set; }
+        int PicHeight { get; set; }
+        int GetARGBColor(byte[] data, int y, int x);
+        void SetPacking(int bpp, ColorFormat colorFormat);
+        int ColorBPP { get; set; }
+        ColorFormat ColorFormat { get; }
+    }
+
+    public class PictureAdapter : IPictureFormat, INotifyPropertyChanged {
+        private IPictureFormatImpl decoder;
+        private byte[] data;
+        private int picOffset;
+        public PictureAdapter(IPictureFormatImpl decoder) {
+            this.decoder = decoder;
+            this.decoder.Changed += decoder_Changed;
+        }
+        void decoder_Changed(object sender, EventArgs e) {
+            OnChanged(null);
+        }
+        public IPictureFormatImpl Decoder { get { return decoder; } }
+        public byte[] Data {
+            get { return data; }
+            set {
+                if (data == value) return;
+                data = value;
+                OnChanged("Data");
+            }
+        }
+        public void SetPacking(int bpp, ColorFormat colorFormat) {
+            decoder.SetPacking(bpp, colorFormat);
+        }
+        public int ColorBPP {
+            get { return decoder.ColorBPP; }
+            set { decoder.ColorBPP = value; }
+        }
+        public ColorFormat ColorFormat {
+            get { return decoder.ColorFormat; }
+        }
+        public int PicOffset {
+            get { return picOffset; }
+            set {
+                Decoder.PicOffset = value;
+                SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue);
+            }
+        }
+        public int PicStride {
+            get { return decoder.PicStride; }
+        }
+        public int PicWidth {
+            get { return decoder.PicWidth; }
+            set { decoder.PicWidth = value; }
+        }
+        public int PicHeight {
+            get { return decoder.PicHeight; }
+            set { decoder.PicHeight = value; }
+        }
+        public int GetARGBColor(int y, int x) {
+            return decoder.GetARGBColor(Data, y, x);
+        }
+        private void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
+            if (value == store) return;
+            store = Math.Max(min, Math.Min(max, value));
+            OnChanged(name);
+        }
+        private void OnChanged(string propertyName) {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            if (Changed != null) Changed(this, EventArgs.Empty);
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler Changed;
+    }
+
+    public class DirectPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
         private int picOffset;
         private int picStride;
         private int picWidth;
@@ -136,7 +211,7 @@ namespace Rippix {
         public event EventHandler Changed;
     }
 
-    public class IndexedPictureFormat : INotifyPropertyChanged, IPictureFormat {
+    public class IndexedPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
         private int picOffset;
         private int picStride;
         private int picWidth;
@@ -311,7 +386,7 @@ namespace Rippix {
         public event EventHandler Changed;
     }
 
-    public class TestPictureDecoder : IPictureFormat, INotifyPropertyChanged {
+    public class TestPictureDecoder : IPictureFormatImpl, INotifyPropertyChanged {
         private int picOffset;
         //private int picStride;
         //private int picWidth;

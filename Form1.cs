@@ -20,21 +20,28 @@ namespace Rippix {
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
             CreateColorMenuItems();
-            //setPictureDecoder(new PictureFormat());
         }
 
-        void setPictureDecoder(IPictureFormat decoder) {
+        void setPictureDecoder(IPictureFormatImpl decoder) {
             if (picture != null) {
                 picture.Changed -= new EventHandler(Format_Changed);
             }
-            picture = decoder;
-            pixelView1.Format = decoder;
+            var old = picture;
+            picture = new PictureAdapter(decoder);
             if (picture != null) {
+                if (old != null) {
+                    picture.Data = old.Data;
+                    picture.PicOffset = old.PicOffset;
+                    picture.PicWidth = old.PicWidth;
+                    picture.PicHeight = old.PicHeight;
+                    picture.ColorBPP = old.ColorBPP;
+                };
                 picture.Changed += new EventHandler(Format_Changed);
                 propertyGrid1.SelectedObject = picture;
                 propertyGrid2.SelectedObject = picture.ColorFormat;
                 Format_Changed(picture, EventArgs.Empty);
             }
+            pixelView1.Format = picture;
         }
 
         void Format_Changed(object sender, EventArgs e) {
@@ -65,7 +72,7 @@ namespace Rippix {
                 if (picture == null) {
                     setPictureDecoder(new DirectPictureFormat());
                 }
-                pixelView1.Data = data;
+                picture.Data = data;
                 picture.PicOffset = 0;
                 picture.PicWidth = 8;
                 picture.PicHeight = 8;
@@ -127,15 +134,7 @@ namespace Rippix {
                 var item = new ToolStripMenuItem();
                 item.Text = "Direct";
                 item.Click += delegate {
-                    var old = picture;
-                    IPictureFormat format = new DirectPictureFormat();
-                    if (old != null) {
-                        format.PicOffset = old.PicOffset;
-                        format.PicWidth = old.PicWidth;
-                        format.PicHeight = old.PicHeight;
-                        format.ColorBPP = old.ColorBPP;
-                    };
-                    setPictureDecoder(format);
+                    setPictureDecoder(new DirectPictureFormat());
                 };
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
@@ -143,15 +142,7 @@ namespace Rippix {
                 var item = new ToolStripMenuItem();
                 item.Text = "Indexed";
                 item.Click += delegate {
-                    var old = picture;
-                    IPictureFormat format = new IndexedPictureFormat();
-                    if (old != null) {
-                        format.PicOffset = old.PicOffset;
-                        format.PicWidth = old.PicWidth;
-                        format.PicHeight = old.PicHeight;
-                        format.ColorBPP = old.ColorBPP;
-                    };
-                    setPictureDecoder(format);
+                    setPictureDecoder(new IndexedPictureFormat());
                 };
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
@@ -159,15 +150,7 @@ namespace Rippix {
                 var item = new ToolStripMenuItem();
                 item.Text = "Amiga4";
                 item.Click += delegate {
-                    var old = picture;
-                    IPictureFormat format = new TestPictureDecoder();
-                    if (old != null) {
-                        format.PicOffset = old.PicOffset;
-                        format.PicWidth = old.PicWidth;
-                        format.PicHeight = old.PicHeight;
-                        format.ColorBPP = old.ColorBPP;
-                    };
-                    setPictureDecoder(format);
+                    setPictureDecoder(new TestPictureDecoder());
                 };
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }

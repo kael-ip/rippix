@@ -11,20 +11,11 @@ using Rippix.Model;
 namespace Rippix {
 
     public class PixelView : Control{
-        private byte[] data;
-        public byte[] Data {
-            get { return data; }
-            set {
-                if (data == value) return;
-                data = value;
-                format_Changed(null, EventArgs.Empty);
-            }
-        }
         private IPictureAdapter format;
         public IPictureAdapter Format {
             get { return format; }
             set {
-                if (Equals( format,value)) return;
+                if (Equals(format, value)) return;
                 if (format != null) {
                     format.Changed -= format_Changed;
                 }
@@ -92,7 +83,7 @@ namespace Rippix {
         int[] lineBuffer;
         long[] timings = new long[100];
         private void UpdateBitmap() {
-            if (Format == null || Data == null) return;
+            if (Format == null || Format.Data == null) return;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             timings[0] = sw.ElapsedTicks;
@@ -129,7 +120,7 @@ namespace Rippix {
         }
         private void RenderScanLine(int[] lineBuffer, int scanline) {
             for (int i = 0; i < lineBuffer.Length; i++) {
-                lineBuffer[i] = Format.GetARGBColor(Data, scanline, i);
+                lineBuffer[i] = Format.GetARGBColor(scanline, i);
             }
         }
         protected override bool IsInputKey(Keys keyData) {
@@ -141,7 +132,7 @@ namespace Rippix {
         }
         protected override void OnKeyDown(KeyEventArgs e) {
             base.OnKeyDown(e);
-            if (Format == null || Data == null) return;
+            if (Format == null || Format.Data == null) return;
             int step = e.Control ? 8 : 1;
             CorrectOffset(0);
             int oldOffset = format.PicOffset;
@@ -205,7 +196,7 @@ namespace Rippix {
             CorrectOffset(oldOffset);
         }
         private void CorrectOffset(int oldOffset) {
-            if (format.PicOffset < 0 || format.PicOffset >= Data.Length) {
+            if (format.PicOffset < 0 || format.PicOffset >= Format.Data.Length) {
                 format.PicOffset = oldOffset;
             }
         }
