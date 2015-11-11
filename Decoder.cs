@@ -48,6 +48,7 @@ namespace Rippix {
             OnChanged(null);
         }
         public IPictureDecoder Decoder { get { return decoder; } }
+        [Browsable(false)]
         public byte[] Data {
             get { return data; }
             set {

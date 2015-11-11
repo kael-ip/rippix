@@ -53,7 +53,7 @@ namespace Rippix {
             //base.OnPaint(e);
             SolidBrush brush = new SolidBrush(this.BackColor);
             Rectangle rect = Rectangle.Empty;
-            if (Format != null) {
+            if (Format != null && Format.ImageWidth > 0 && Format.ImageHeight > 0) {
                 EnsureBitmap();
                 if (isDirty) UpdateBitmap();
                 SolidBrush tbrush = new SolidBrush(this.BoxBackColor);
@@ -136,19 +136,21 @@ namespace Rippix {
             int step = e.Control ? 8 : 1;
             CorrectOffset(0);
             int oldOffset = format.PicOffset;
+            int tWidth = Format.Width;
+            int tHeight = Format.Height;
             if (e.Shift) {
                 switch (e.KeyCode) {
                     case Keys.Up:
-                        format.Height -= step;
+                        tHeight -= step;
                         break;
                     case Keys.Down:
-                        format.Height += step;
+                        tHeight += step;
                         break;
                     case Keys.Left:
-                        format.Width -= step;
+                        tWidth -= step;
                         break;
                     case Keys.Right:
-                        format.Width += step;
+                        tWidth += step;
                         break;
                     case Keys.PageUp:
                         break;
@@ -193,6 +195,8 @@ namespace Rippix {
                         break;
                 }
             }
+            if (tWidth > 0) Format.Width = tWidth;
+            if (tHeight > 0) Format.Height = tHeight;
             CorrectOffset(oldOffset);
         }
         private void CorrectOffset(int oldOffset) {

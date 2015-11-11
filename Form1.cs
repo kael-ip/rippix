@@ -48,6 +48,7 @@ namespace Rippix {
 
         void Format_Changed(object sender, EventArgs e) {
             propertyGrid1.Refresh();
+            propertyGrid2.SelectedObject = picture.ColorFormat;
             propertyGrid2.Refresh();
             highlightColorItem();
         }

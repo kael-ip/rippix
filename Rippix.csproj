@@ -64,6 +64,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ColorFormat.cs" />
+    <Compile Include="Tests\DirectDecoder.cs" />
+    <Compile Include="Tests\PackedDecoder.cs" />
     <Compile Include="Tests\Serialization.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

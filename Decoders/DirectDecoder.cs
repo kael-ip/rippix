@@ -23,7 +23,7 @@ namespace Rippix.Decoders {
         }
         public int ColorBPP {
             get { return bypp * 8; }
-            set { SetIntPropertyValue("ColorBPP", ref bypp, ((value + 7) & 0xf8), 1, 4); }//{8/16/24/32}
+            set { SetIntPropertyValue("ColorBPP", ref bypp, ((value + 7) >> 3), 1, 4); }//{8/16/24/32}
         }
         public ColorFormat ColorFormat {
             get { return colorFormat; }
