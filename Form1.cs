@@ -33,8 +33,8 @@ namespace Rippix {
                 if (old != null) {
                     picture.Data = old.Data;
                     picture.PicOffset = old.PicOffset;
-                    picture.PicWidth = old.PicWidth;
-                    picture.PicHeight = old.PicHeight;
+                    picture.Width = old.Width;
+                    picture.Height = old.Height;
                     picture.ColorBPP = old.ColorBPP;
                 };
                 picture.Changed += new EventHandler(Format_Changed);
@@ -75,8 +75,8 @@ namespace Rippix {
                 }
                 picture.Data = data;
                 picture.PicOffset = 0;
-                picture.PicWidth = 8;
-                picture.PicHeight = 8;
+                picture.Width = 8;
+                picture.Height = 8;
                 highlightColorItem();
             } catch { }
         }

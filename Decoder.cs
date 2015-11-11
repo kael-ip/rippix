@@ -10,9 +10,12 @@ namespace Rippix {
         event EventHandler Changed;
         byte[] Data { get; set; }
         int PicOffset { get; set; }
-        int PicStride { get; }
-        int PicWidth { get; set; }
-        int PicHeight { get; set; }
+        int LineStride { get; }
+        int FrameStride { get; }
+        int Width { get; set; }
+        int Height { get; set; }
+        int ImageWidth { get; }
+        int ImageHeight { get; }
         int GetARGBColor(int y, int x);
     }
 
@@ -65,17 +68,22 @@ namespace Rippix {
             get { return picOffset; }
             set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue); }
         }
-        public int PicStride {
+        public int LineStride {
             get { return decoder.LineStride; }
         }
-        public int PicWidth {
+        public int FrameStride {
+            get { return decoder.LineStride * decoder.ImageHeight; }
+        }
+        public int Width {
             get { return (pictureControl != null) ? pictureControl.Width : 0; }
             set { if (pictureControl != null) { pictureControl.Width = value; } }
         }
-        public int PicHeight {
+        public int Height {
             get { return (pictureControl != null) ? pictureControl.Height : 0; }
             set { if (pictureControl != null) { pictureControl.Height = value; } }
         }
+        public int ImageWidth { get { return decoder.ImageWidth; } }
+        public int ImageHeight { get { return decoder.ImageHeight; } }
         public int GetARGBColor(int y, int x) {
             return decoder.GetARGB(Data, PicOffset, x, y);
         }
@@ -209,6 +217,7 @@ namespace Rippix {
         public int ImageWidth { get { return PicWidth; } }
         public int ImageHeight { get { return PicHeight; } }
         public int LineStride { get { return PicStride; } }
+        public int FrameStride { get { return PicStride * PicHeight; } }
         public int GetARGB(byte[] data, int offset, int x, int y) {
             return GetARGBColor(data, offset, y, x);
         }
@@ -369,6 +378,7 @@ namespace Rippix {
         public int ImageWidth { get { return PicWidth; } }
         public int ImageHeight { get { return PicHeight; } }
         public int LineStride { get { return PicStride; } }
+        public int FrameStride { get { return PicStride * PicHeight; } }
         public int GetARGB(byte[] data, int offset, int x, int y) {
             return GetARGBColor(data, offset, y, x);
         }
@@ -434,6 +444,7 @@ namespace Rippix {
         public int ImageWidth { get { return PicWidth; } }
         public int ImageHeight { get { return PicHeight; } }
         public int LineStride { get { return PicStride; } }
+        public int FrameStride { get { return PicStride * PicHeight; } }
         public int GetARGB(byte[] data, int offset, int x, int y) {
             return GetARGBColor(data, offset, y, x);
         }

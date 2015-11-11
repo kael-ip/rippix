@@ -75,7 +75,7 @@ namespace Rippix {
             //base.OnPaintBackground(pevent);
         }
         private void EnsureBitmap() {
-            Size sz = new Size(Format.PicWidth, Format.PicHeight);
+            Size sz = new Size(Format.ImageWidth, Format.ImageHeight);
             if (bitmap == null || bitmap.Size != sz) {
                 bitmap = new Bitmap(sz.Width, sz.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             }
@@ -139,16 +139,16 @@ namespace Rippix {
             if (e.Shift) {
                 switch (e.KeyCode) {
                     case Keys.Up:
-                        format.PicHeight -= step;
+                        format.Height -= step;
                         break;
                     case Keys.Down:
-                        format.PicHeight += step;
+                        format.Height += step;
                         break;
                     case Keys.Left:
-                        format.PicWidth -= step;
+                        format.Width -= step;
                         break;
                     case Keys.Right:
-                        format.PicWidth += step;
+                        format.Width += step;
                         break;
                     case Keys.PageUp:
                         break;
@@ -166,10 +166,10 @@ namespace Rippix {
             } else {
                 switch (e.KeyCode) {
                     case Keys.Up:
-                        format.PicOffset -= format.PicStride*step;
+                        format.PicOffset -= format.LineStride * step;
                         break;
                     case Keys.Down:
-                        format.PicOffset += format.PicStride*step;
+                        format.PicOffset += format.LineStride * step;
                         break;
                     case Keys.Left:
                         format.PicOffset -= step;
@@ -178,10 +178,10 @@ namespace Rippix {
                         format.PicOffset += step;
                         break;
                     case Keys.PageUp:
-                        format.PicOffset -= format.PicStride * format.PicHeight;
+                        format.PicOffset -= format.FrameStride;
                         break;
                     case Keys.PageDown:
-                        format.PicOffset += format.PicStride * format.PicHeight;
+                        format.PicOffset += format.FrameStride;
                         break;
                     case Keys.Add:
                     case Keys.Subtract:

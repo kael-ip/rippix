@@ -117,6 +117,7 @@ namespace Rippix.Model {
         int ImageWidth { get; }
         int ImageHeight { get; }
         int LineStride { get; }
+        int FrameStride { get; }
         int GetARGB(byte[] data, int offset, int x, int y);
     }
 
