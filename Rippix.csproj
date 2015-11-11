@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="ColorFormat.cs" />
     <Compile Include="Decoder.cs" />
+    <Compile Include="Decoders\DirectDecoder.cs" />
+    <Compile Include="Decoders\PackedDecoder.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,9 +92,7 @@
     <None Include="Resources\MainIcon.ico" />
     <Content Include="todo.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Decoders\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,4 +1,5 @@
-﻿using Rippix.Model;
+﻿using Rippix.Decoders;
+using Rippix.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -71,7 +72,7 @@ namespace Rippix {
             try {
                 byte[] data = System.IO.File.ReadAllBytes(dlg.FileName);
                 if (picture == null) {
-                    setPictureDecoder(new DirectPictureFormat());
+                    setPictureDecoder(new DirectDecoder());
                 }
                 picture.Data = data;
                 picture.PicOffset = 0;
@@ -143,7 +144,8 @@ namespace Rippix {
 
         private void CreateFormatMenuItems() {
             var list = new List<ToolStripItem>();
-            list.Add(CreateFormatMenuItem("Direct", new DirectPictureFormat()));
+            list.Add(CreateFormatMenuItem("Direct", new DirectDecoder()));
+            list.Add(CreateFormatMenuItem("Packed", new PackedDecoder()));
             list.Add(CreateFormatMenuItem("Indexed", new IndexedPictureFormat()));
             list.Add(CreateFormatMenuItem("Amiga4", new TestPictureDecoder()));
             formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());

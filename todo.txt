@@ -8,28 +8,21 @@ TODO:
 .PictureFormat serialization
 +Suppress flicker on repaint
 .Separate format geometry from offsets
-.Use the serialized geometry format for presets (also show selection by comparing serialized data)
++Use the serialized geometry format for presets (also show selection by comparing serialized data)
 .Add grayscale mode presets
 .Bitplanes
 .Fixed palettes
 .Fixed palettes save and load
 .Pan h&v per pixel, not per byte (as an option in multibyte packing modes)
+.Some exotic modes
 
-    /*
-     * Modes:
-     * - Raw RGBA (32/24/16/8 bpp, different orders)
-     * - Indexed with palette
-     * -- packed (8/4/2/1 bpp)
-     * -- planes (1..8)
-     * 
-     * 
-     * Direct/Indexed
-     * bpp (32/24/16/8/4/2/1)
-     * planes
-     */
+Modes:
+[Direct/Indexed]
+[Packed/Planar/Composite]
+[Linear/Interleaved/Tiled]
 
-    //TODO: fixed palettes
-    //+TODO: optimize / native impl
-    //TODO: bitplanes
-    //TODO: exotic modes
+- Raw RGBA (32/24/16/8 bpp, different orders)
+- Palette
+- packed (8/4/2/1 bpp)
+- planes (1..8)
 
