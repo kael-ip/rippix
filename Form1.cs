@@ -105,7 +105,8 @@ namespace Rippix {
                 var item2 = (ToolStripItem)s;
                 var preset = (FormatPreset)item2.Tag;
                 if (picture == null) return;
-                picture.SetPacking(preset.ColorBPP, preset.ColorFormat);
+                picture.ColorBPP = preset.ColorBPP;
+                picture.ColorFormat = new ColorFormat(preset.ColorFormat);
             };
             return item;
         }

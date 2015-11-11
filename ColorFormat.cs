@@ -9,6 +9,9 @@ namespace Rippix {
 
         public ColorFormat() {
         }
+        public ColorFormat(ColorFormat source)
+            : this(source.shiftR, source.bitsR, source.shiftG, source.bitsG, source.shiftB, source.bitsB, source.shiftA, source.bitsA) {
+        }
         public ColorFormat(int shiftR, int bitsR, int shiftG, int bitsG, int shiftB, int bitsB)
             : this(shiftR, bitsR, shiftG, bitsG, shiftB, bitsB, 0, 0) {
         }
