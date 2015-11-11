@@ -96,7 +96,47 @@ namespace Rippix {
         public event EventHandler Changed;
     }
 
-    public class DirectPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
+    public abstract class PictureFormatBase : INotifyPropertyChanged {
+        protected int GetValue(byte[] data, int loffset, int poffset, int bpp) {
+            int offset = loffset + ((poffset * bpp) >> 3);
+            if (offset < 0 || offset + (bpp >> 3) >= data.Length) return 0;
+            int v = 0;
+            switch (bpp) {
+                case 32:
+                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], data[offset + 3] << 24);
+                    break;
+                case 24:
+                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], 0);
+                    break;
+                case 16:
+                    v = data[offset] | ((int)data[offset + 1] << 8);
+                    break;
+                case 8:
+                    v = data[offset];
+                    break;
+                case 4:
+                    v = (data[offset] >> ((1 - (poffset & 1)) << 2)) & 15;
+                    break;
+                case 2:
+                    v = (data[offset] >> ((3 - (poffset & 3)) << 1)) & 3;
+                    break;
+                case 1:
+                    v = (data[offset] >> ((7 - (poffset & 7)) << 0)) & 1;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+            return v;
+        }
+        protected void OnChanged(string propertyName) {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            if (Changed != null) Changed(this, EventArgs.Empty);
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler Changed;
+    }
+
+    public class DirectPictureFormat : PictureFormatBase, IPictureFormatImpl {
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -143,12 +183,6 @@ namespace Rippix {
                 OnChanged("ColorFormat");
             }
         }
-
-        private void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
-            if (value == store) return;
-            store = Math.Max(min, Math.Min(max, value));
-            OnChanged(name);
-        }
         private bool CalcStride(int width) {
             return CalcStride(width, ColorBPP);
         }
@@ -171,46 +205,14 @@ namespace Rippix {
             v = ColorFormat.Decode(v);
             return v;
         }
-        private int GetValue(byte[] data, int loffset, int poffset, int bpp) {
-            int offset = loffset + ((poffset * bpp) >> 3);
-            if (offset < 0 || offset + (bpp >> 3) >= data.Length) return 0;
-            int v = 0;
-            switch (bpp) {
-                case 32:
-                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], data[offset + 3] << 24);
-                    break;
-                case 24:
-                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], 0);
-                    break;
-                case 16:
-                    v = data[offset] | ((int)data[offset + 1] << 8);
-                    break;
-                case 8:
-                    v = data[offset];
-                    break;
-                case 4:
-                    v = (data[offset] >> ((1 - (poffset & 1)) << 2)) & 15;
-                    break;
-                case 2:
-                    v = (data[offset] >> ((3 - (poffset & 3)) << 1)) & 3;
-                    break;
-                case 1:
-                    v = (data[offset] >> ((7 - (poffset & 7)) << 0)) & 1;
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-            return v;
+        protected void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
+            if (value == store) return;
+            store = Math.Max(min, Math.Min(max, value));
+            OnChanged(name);
         }
-        private void OnChanged(string propertyName) {
-            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            if (Changed != null) Changed(this, EventArgs.Empty);
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler Changed;
     }
 
-    public class IndexedPictureFormat : INotifyPropertyChanged, IPictureFormatImpl {
+    public class IndexedPictureFormat : PictureFormatBase, IPictureFormatImpl {
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -333,37 +335,6 @@ namespace Rippix {
             }
             return palCache[c];
         }
-        private int GetValue(byte[] data, int loffset, int poffset, int bpp) {
-            int offset = loffset + ((poffset * bpp) >> 3);
-            if (offset < 0 || offset + (bpp >> 3) >= data.Length) return 0;
-            int v = 0;
-            switch (bpp) {
-                case 32:
-                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], data[offset + 3] << 24);
-                    break;
-                case 24:
-                    v = ColorFormat.Pack(data[offset], data[offset + 1], data[offset + 2], 0);
-                    break;
-                case 16:
-                    v = data[offset] | ((int)data[offset + 1] << 8);
-                    break;
-                case 8:
-                    v = data[offset];
-                    break;
-                case 4:
-                    v = (data[offset] >> ((1 - (poffset & 1)) << 2)) & 15;
-                    break;
-                case 2:
-                    v = (data[offset] >> ((3 - (poffset & 3)) << 1)) & 3;
-                    break;
-                case 1:
-                    v = (data[offset] >> ((7 - (poffset & 7)) << 0)) & 1;
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-            return v;
-        }
         private int GetPalOffset(int offset) {
             if (palRelative) {
                 return offset + GetPictureLength() + PalOffset;
@@ -371,17 +342,11 @@ namespace Rippix {
                 return PalOffset;
             }
         }
-        private void OnChanged(string propertyName) {
-            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            if (Changed != null) Changed(this, EventArgs.Empty);
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler Changed;
     }
 
     public class TestPictureDecoder : IPictureFormatImpl, INotifyPropertyChanged {
-        private int[] palCache;
-        private ColorFormat colorFormat;
+        //private int[] palCache;
+        //private ColorFormat colorFormat;
         private int PlanesCount = 4;
         public int PicWidth { get { return 320; } set { } }
         public int PicHeight { get { return 200; } set { } }
@@ -389,7 +354,7 @@ namespace Rippix {
         public void SetPacking(int bpp, ColorFormat colorFormat) {
         }
         public int ColorBPP { get { return 24; } set { } }
-        public ColorFormat ColorFormat { get { return colorFormat; } set { } }
+        public ColorFormat ColorFormat { get { return null; } set { } }
         public int GetARGBColor(byte[] data, int offset, int y, int x) {
             int o = offset + y * PicStride;
             int xby = x >> 3;
