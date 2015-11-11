@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rippix.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,7 +23,7 @@ namespace Rippix {
             CreateColorMenuItems();
         }
 
-        void setPictureDecoder(IPictureFormatImpl decoder) {
+        void setPictureDecoder(IPictureDecoder decoder) {
             if (picture != null) {
                 picture.Changed -= new EventHandler(Format_Changed);
             }
@@ -135,7 +136,7 @@ namespace Rippix {
             item.Click += (s, e) => {
                 var item2 = (ToolStripItem)s;
                 if (item2.Tag == null) return;
-                setPictureDecoder((IPictureFormatImpl)item2.Tag);
+                setPictureDecoder((IPictureDecoder)item2.Tag);
             };
             return item;
         }

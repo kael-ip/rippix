@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Rippix.Model;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -19,7 +21,7 @@ namespace Rippix {
         ColorFormat ColorFormat { get; set; }
     }
 
-    public interface IPictureControl {
+    public interface IPictureController {
         event EventHandler Changed;
         int Width { get; set; }
         int Height { get; set; }
@@ -27,28 +29,22 @@ namespace Rippix {
         ColorFormat ColorFormat { get; set; }
     }
 
-    public interface IPictureFormatImpl {
-        event EventHandler Changed;
-        int PicStride { get; }
-        int PicWidth { get; set; }
-        int PicHeight { get; set; }
-        int GetARGBColor(byte[] data, int offset, int y, int x);
-        int ColorBPP { get; set; }
-        ColorFormat ColorFormat { get; set; }
-    }
-
     public class PictureAdapter : IPictureFormat, INotifyPropertyChanged {
-        private IPictureFormatImpl decoder;
+        private IPictureDecoder decoder;
+        private IPictureController pictureControl;
         private byte[] data;
         private int picOffset;
-        public PictureAdapter(IPictureFormatImpl decoder) {
+        public PictureAdapter(IPictureDecoder decoder) {
             this.decoder = decoder;
-            this.decoder.Changed += decoder_Changed;
+            this.pictureControl = decoder as IPictureController;
+            if (this.pictureControl != null) {
+                this.pictureControl.Changed += decoder_Changed;
+            }
         }
         void decoder_Changed(object sender, EventArgs e) {
             OnChanged(null);
         }
-        public IPictureFormatImpl Decoder { get { return decoder; } }
+        public IPictureDecoder Decoder { get { return decoder; } }
         public byte[] Data {
             get { return data; }
             set {
@@ -58,30 +54,30 @@ namespace Rippix {
             }
         }
         public int ColorBPP {
-            get { return decoder.ColorBPP; }
-            set { decoder.ColorBPP = value; }
+            get { return (pictureControl != null) ? pictureControl.ColorBPP : 0; }
+            set { if (pictureControl != null) { pictureControl.ColorBPP = value; } }
         }
         public ColorFormat ColorFormat {
-            get { return decoder.ColorFormat; }
-            set { decoder.ColorFormat = value; }
+            get { return (pictureControl != null) ? pictureControl.ColorFormat : null; }
+            set { if (pictureControl != null) { pictureControl.ColorFormat = value; } }
         }
         public int PicOffset {
             get { return picOffset; }
             set { SetIntPropertyValue("PicOffset", ref picOffset, value, 0, int.MaxValue); }
         }
         public int PicStride {
-            get { return decoder.PicStride; }
+            get { return decoder.LineStride; }
         }
         public int PicWidth {
-            get { return decoder.PicWidth; }
-            set { decoder.PicWidth = value; }
+            get { return (pictureControl != null) ? pictureControl.Width : 0; }
+            set { if (pictureControl != null) { pictureControl.Width = value; } }
         }
         public int PicHeight {
-            get { return decoder.PicHeight; }
-            set { decoder.PicHeight = value; }
+            get { return (pictureControl != null) ? pictureControl.Height : 0; }
+            set { if (pictureControl != null) { pictureControl.Height = value; } }
         }
         public int GetARGBColor(int y, int x) {
-            return decoder.GetARGBColor(Data, PicOffset, y, x);
+            return decoder.GetARGB(Data, PicOffset, x, y);
         }
         private void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
             if (value == store) return;
@@ -136,7 +132,7 @@ namespace Rippix {
         public event EventHandler Changed;
     }
 
-    public class DirectPictureFormat : PictureFormatBase, IPictureFormatImpl {
+    public class DirectPictureFormat : PictureFormatBase, IPictureDecoder, IPictureController {
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -210,9 +206,37 @@ namespace Rippix {
             store = Math.Max(min, Math.Min(max, value));
             OnChanged(name);
         }
+        public int ImageWidth { get { return PicWidth; } }
+        public int ImageHeight { get { return PicHeight; } }
+        public int LineStride { get { return PicStride; } }
+        public int GetARGB(byte[] data, int offset, int x, int y) {
+            return GetARGBColor(data, offset, y, x);
+        }
+        public void ReadParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
+        public void WriteParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
+        int IPictureController.Width {
+            get { return this.PicWidth; }
+            set { this.PicWidth = value; }
+        }
+        int IPictureController.Height {
+            get { return this.PicHeight; }
+            set { this.PicHeight = value; }
+        }
+        int IPictureController.ColorBPP {
+            get { return this.ColorBPP; }
+            set { this.ColorBPP = value; }
+        }
+        ColorFormat IPictureController.ColorFormat {
+            get { return this.ColorFormat; }
+            set { this.ColorFormat = value; }
+        }
     }
 
-    public class IndexedPictureFormat : PictureFormatBase, IPictureFormatImpl {
+    public class IndexedPictureFormat : PictureFormatBase, IPictureDecoder, IPictureController {
         private int picStride;
         private int picWidth;
         private int picHeight;
@@ -342,9 +366,37 @@ namespace Rippix {
                 return PalOffset;
             }
         }
+        public int ImageWidth { get { return PicWidth; } }
+        public int ImageHeight { get { return PicHeight; } }
+        public int LineStride { get { return PicStride; } }
+        public int GetARGB(byte[] data, int offset, int x, int y) {
+            return GetARGBColor(data, offset, y, x);
+        }
+        public void ReadParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
+        public void WriteParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
+        int IPictureController.Width {
+            get { return this.PicWidth; }
+            set { this.PicWidth = value; }
+        }
+        int IPictureController.Height {
+            get { return this.PicHeight; }
+            set { this.PicHeight = value; }
+        }
+        int IPictureController.ColorBPP {
+            get { return this.ColorBPP; }
+            set { this.ColorBPP = value; }
+        }
+        ColorFormat IPictureController.ColorFormat {
+            get { return this.ColorFormat; }
+            set { this.ColorFormat = value; }
+        }
     }
 
-    public class TestPictureDecoder : IPictureFormatImpl, INotifyPropertyChanged {
+    public class TestPictureDecoder : INotifyPropertyChanged, IPictureDecoder, IPictureController {
         //private int[] palCache;
         //private ColorFormat colorFormat;
         private int PlanesCount = 4;
@@ -379,11 +431,39 @@ namespace Rippix {
             //if (makeDirty) palCacheDirty = true;
             OnChanged(name);
         }
+        public int ImageWidth { get { return PicWidth; } }
+        public int ImageHeight { get { return PicHeight; } }
+        public int LineStride { get { return PicStride; } }
+        public int GetARGB(byte[] data, int offset, int x, int y) {
+            return GetARGBColor(data, offset, y, x);
+        }
+        public void ReadParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
+        public void WriteParameters(IList<Parameter> parameters) {
+            throw new NotImplementedException();
+        }
         private void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             if (Changed != null) Changed(this, EventArgs.Empty);
         }
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler Changed;
+        int IPictureController.Width {
+            get { return 320; }
+            set { }
+        }
+        int IPictureController.Height {
+            get { return 200; }
+            set { }
+        }
+        int IPictureController.ColorBPP {
+            get { return 24; }
+            set { }
+        }
+        ColorFormat IPictureController.ColorFormat {
+            get { return null; }
+            set { }
+        }
     }
 }

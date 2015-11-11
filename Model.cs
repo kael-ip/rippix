@@ -116,7 +116,7 @@ namespace Rippix.Model {
     public interface IPictureDecoder : IDecoder {
         int ImageWidth { get; }
         int ImageHeight { get; }
-        int Stride { get; }
+        int LineStride { get; }
         int GetARGB(byte[] data, int offset, int x, int y);
     }
 
