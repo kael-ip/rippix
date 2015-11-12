@@ -7,10 +7,11 @@ using System.Text;
 
 namespace Rippix.Decoders {
 
-    public class PackedDecoder : IPictureDecoder, IPictureController, INotifyPropertyChanged {
+    public class PackedDecoder : IPictureDecoder, INeedsPalette, IPictureController, INotifyPropertyChanged {
         private int width;
         private int height;
         private int ppbyp;//pixels per byte power
+        private IPalette palette;
         private ColorFormat colorFormat;
         public PackedDecoder() {
             this.width = 16;
@@ -20,6 +21,23 @@ namespace Rippix.Decoders {
         }
         void colorFormat_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             OnChanged("ColorFormat." + e.PropertyName);
+        }
+        void palette_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            OnChanged("Palette." + e.PropertyName);
+        }
+        public IPalette Palette {
+            get { return palette; }
+            set {
+                if (Equals(palette, value)) return;
+                if ((palette as INotifyPropertyChanged) != null) {
+                    ((INotifyPropertyChanged)palette).PropertyChanged -= palette_PropertyChanged;
+                }
+                palette = value;
+                if ((palette as INotifyPropertyChanged) != null) {
+                    ((INotifyPropertyChanged)palette).PropertyChanged += palette_PropertyChanged;
+                }
+                OnChanged("Palette");
+            }
         }
         public int ColorBPP {
             get { return (1<<(3-ppbyp)); }//(3)8->1/(2)4->2/(1)2->4/(0)1->8
@@ -61,7 +79,10 @@ namespace Rippix.Decoders {
             int loffset = offset + (y * LineStride);
             int v;
             v = GetValue(data, loffset, x);
-            v = ColorFormat.Decode(v);
+            //v = ColorFormat.Decode(v);
+            if (Palette != null) {
+                v = Palette.GetARGB(v);
+            }
             return v;
         }
         private int GetValue(byte[] data, int loffset, int poffset) {

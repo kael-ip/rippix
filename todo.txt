@@ -26,3 +26,10 @@ Modes:
 - packed (8/4/2/1 bpp)
 - planes (1..8)
 
+=====
+
+IDecoder - desribes an object that can decode something based on parameters.
+IPictureDecoder - describes an object that decodes an image from byte data.
+IPaletteDecoder - describes an object that decodes a palette from byte data.
+
+IPalette - an object that returns a color based on a linear index (can be based on IPaletteDecoder or be fixed, generated, etc.).

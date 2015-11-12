@@ -6,63 +6,75 @@ using System.Text;
 
 namespace Rippix {
 
-    public interface IPaletteAdapter {
-        byte[] Data { get; set; }
-        int Offset { get; set; }
-        int Length { get; }
-        int GetARGBColor(int i);
+    public interface IPalette {
+        int GetARGB(int index);
     }
 
-    public class PaletteAdapter : IPaletteAdapter {
-        private IPaletteDecoder decoder;
-        private byte[] data;
-        private int offset;
-        private int[] palCache;
-        private bool isCacheDirty;
-        private bool IsFixedPalette = true;
-        public PaletteAdapter(IPaletteDecoder decoder) {
-            this.decoder = decoder;
-            this.isCacheDirty = true;
-        }
-        private int bpp = 8;
-        public int BPP {
-            get { return bpp; }
-            set { bpp = (value < 0) ? 0 : (value > 8) ? 8 : value; }
-        }
-        public byte[] Data {
-            get { return data; }
-            set { }
-        }
-        public int Offset {
-            get { return offset; }
-            set { }
-        }
+    public interface INeedsPalette {
+        IPalette Palette { get; set; }
+    }
+
+    public class GrayscalePalette : IPalette {
+        private int length;
         public int Length {
-            get { return (1 << bpp); }
+            get { return length; }
+            set { length = value; }
         }
-        private int GetGrayscale(int i) {
-            int v = 0;
-            if (BPP > 0 && BPP <= 8 && i < (1 << BPP)) {
-                v = 255 * i / ((1 << BPP) - 1);
-                v = ColorFormat.Pack(v, v, v, 255);
-            }
+        public int GetARGB(int index) {
+            if (index < 0 || index >= Length) return 0;
+            var v = 255 * index / (Length - 1);
+            v = ColorFormat.Pack(v, v, v, 255);
             return v;
         }
-        public int GetARGBColor(int c) {
-            if (c < 0 || c > Length) return 0;
+    }
+
+    public class CachedPalette : IPalette {
+        private int[] palCache;
+        private bool isCacheDirty;
+        private IPalette nested;
+        private int length;
+        public CachedPalette(IPalette nested, int length) {
+            this.nested = nested;
+            this.length = length;
+        }
+        public int Length { get { return length; } }
+        public int GetARGB(int index) {
+            if (index < 0 || index > Length) return 0;
             if (isCacheDirty) {
-                for (int i = 0; i <= 255; i++) {
-                    int v = 0;
-                    if (IsFixedPalette) {
-                        v = GetGrayscale(i);
-                    } else {
-                        v = decoder.GetARGB(Data, Offset, i);
-                    }
-                    palCache[i] = v;
+                if (palCache == null || palCache.Length != Length) {
+                    palCache = new int[Length];
+                }
+                for (int i = 0; i < Length; i++) {
+                    palCache[i] = nested.GetARGB(i);
                 }
                 isCacheDirty = false;
             }
-            return palCache[c];
+            return palCache[index];
+        }
+        public void Invalidate() {
+            isCacheDirty = true;
         }
     }
+
+    public class CodedPalette : IPalette {
+        private IPaletteDecoder decoder;
+        private byte[] data;
+        private int offset;
+        public CodedPalette(IPaletteDecoder decoder) {
+            this.decoder = decoder;
+        }
+        public byte[] Data {
+            get { return data; }
+            set { data = value; }
+        }
+        public int Offset {
+            get { return offset; }
+            set { offset = value; }
+        }
+        public int GetARGB(int index) {
+            if (index < 0 || index >= decoder.Length) return 0;
+            return decoder.GetARGB(Data, Offset, index);
+        }
+    }
+
 }

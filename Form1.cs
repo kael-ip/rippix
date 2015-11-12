@@ -146,7 +146,12 @@ namespace Rippix {
         private void CreateFormatMenuItems() {
             var list = new List<ToolStripItem>();
             list.Add(CreateFormatMenuItem("Direct", new DirectDecoder()));
-            list.Add(CreateFormatMenuItem("Packed", new PackedDecoder()));
+            var d = new PackedDecoder() { Palette = new GrayscalePalette() };
+            d.PropertyChanged += new PropertyChangedEventHandler((s, e) => {
+                var decoder = (PackedDecoder)s;
+                ((GrayscalePalette)decoder.Palette).Length = 1 << decoder.ColorBPP;
+            });
+            list.Add(CreateFormatMenuItem("Packed", d));
             list.Add(CreateFormatMenuItem("Indexed", new IndexedPictureFormat()));
             list.Add(CreateFormatMenuItem("Amiga4", new TestPictureDecoder()));
             formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
