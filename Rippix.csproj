@@ -58,6 +58,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Model.cs" />
+    <Compile Include="Palette.cs" />
     <Compile Include="PixelView.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -121,6 +121,11 @@ namespace Rippix.Model {
         int GetARGB(byte[] data, int offset, int x, int y);
     }
 
+    public interface IPaletteDecoder : IDecoder {
+        int Length { get; }
+        int GetARGB(byte[] data, int offset, int i);
+    }
+
     public class DecoderFactory {
         private static DecoderFactory instance;
         public static DecoderFactory Instance {
