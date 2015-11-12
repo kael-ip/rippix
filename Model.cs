@@ -108,6 +108,33 @@ namespace Rippix.Model {
         public string Value { get; set; }
     }
 
+    public static class ParameterHelper {
+        public static void Poke(this IList<Parameter> parameters, string name, object value) {
+            var p = parameters.FirstOrDefault(z => z.Name == name);
+            if (p == null) {
+                p = new Parameter();
+                parameters.Add(p);
+            }
+            p.Name = name;
+            p.Value = Convert.ToString(value);
+        }
+        public static string Peek(this IList<Parameter> parameters, string name) {
+            var p = parameters.FirstOrDefault(z => z.Name == name);
+            if (p == null) return null;
+            return p.Value;
+        }
+        public static void Peek(this IList<Parameter> parameters, string name, out int v, int _default) {
+            var pv = parameters.Peek(name);
+            if (!Int32.TryParse(pv, out v)) {
+                v = _default;
+            }
+        }
+        public static string Peek(this IList<Parameter> parameters, string name, string _default) {
+            var pv = parameters.Peek(name);
+            return string.IsNullOrEmpty(pv) ? _default : pv;
+        }
+    }
+
     public interface IDecoder {
         void ReadParameters(IList<Parameter> parameters);
         void WriteParameters(IList<Parameter> parameters);

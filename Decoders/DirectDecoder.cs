@@ -78,10 +78,18 @@ namespace Rippix.Decoders {
             return v;
         }
         public void ReadParameters(IList<Parameter> parameters) {
-            throw new NotImplementedException();
+            parameters.Peek("bypp", out bypp, 4);
+            ColorFormat = new Rippix.ColorFormat(parameters.Peek("ColorFormat", ColorFormat.A8R8G8B8));
+            parameters.Peek("Width", out width, 1);
+            parameters.Peek("Height", out height, 8);
         }
         public void WriteParameters(IList<Parameter> parameters) {
-            throw new NotImplementedException();
+            parameters.Poke("Width", width);
+            parameters.Poke("Height", height);
+            if (ColorFormat != null) {
+                parameters.Poke("ColorFormat", ColorFormat);
+            }
+            parameters.Poke("bypp", bypp);
         }
         protected void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));

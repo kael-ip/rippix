@@ -59,6 +59,7 @@ namespace Rippix {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
         public event PropertyChangedEventHandler PropertyChanged;
+        public const string A8R8G8B8 = "S24:8,16:8,8:8,0:8";
         public override bool Equals(object obj) {
             if (obj is ColorFormat) {
                 ColorFormat other = (ColorFormat)obj;
