@@ -13,6 +13,8 @@ namespace Rippix {
     public partial class Form1 : Form {
 
         private IPictureFormat picture;
+        private PictureControllerHelper inputController;
+        private IPalette palette;
 
         public Form1() {
             InitializeComponent();
@@ -22,6 +24,8 @@ namespace Rippix {
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
             CreateColorMenuItems();
+            inputController = new PictureControllerHelper(pixelView1);
+            palette = new GrayscalePalette();
         }
 
         void setPictureDecoder(IPictureDecoder decoder) {
@@ -37,20 +41,32 @@ namespace Rippix {
                     picture.Width = old.Width;
                     picture.Height = old.Height;
                     picture.ColorBPP = old.ColorBPP;
+                    picture.Zoom = old.Zoom;
                 };
+                if (decoder is INeedsPalette) {
+                    ((INeedsPalette)decoder).Palette = palette;
+                }
                 picture.Changed += new EventHandler(Format_Changed);
                 propertyGrid1.SelectedObject = picture;
                 propertyGrid2.SelectedObject = picture.ColorFormat;
                 Format_Changed(picture, EventArgs.Empty);
             }
             pixelView1.Format = picture;
+            inputController.Format = picture;
         }
 
         void Format_Changed(object sender, EventArgs e) {
+            if (inputController.Format != null) {
+                pixelView1.Zoom = inputController.Format.Zoom;
+                inputController.Format.Zoom = pixelView1.Zoom;
+            }
+            ((GrayscalePalette)palette).Length = 1 << picture.ColorBPP;
             propertyGrid1.Refresh();
             propertyGrid2.SelectedObject = picture.ColorFormat;
             propertyGrid2.Refresh();
             highlightColorItem();
+            highlightFormatItem();
+            pixelView1.Refresh();
         }
 
         private void highlightColorItem() {
@@ -67,6 +83,19 @@ namespace Rippix {
             }
         }
 
+        private void highlightFormatItem() {
+            foreach (var item in formatToolStripMenuItem.DropDownItems) {
+                ToolStripMenuItem menuItem = item as ToolStripMenuItem;
+                if (menuItem != null) {
+                    Type decoderType = menuItem.Tag as Type;
+                    if (decoderType != null) {
+                        menuItem.Checked = (picture != null)
+                        && decoderType.IsInstanceOfType(picture.Decoder);
+                    }
+                }
+            }
+        }
+
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
             OpenFileDialog dlg = new OpenFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
@@ -75,11 +104,12 @@ namespace Rippix {
                 if (picture == null) {
                     setPictureDecoder(new DirectDecoder());
                 }
-                picture.Data = data;
                 picture.PicOffset = 0;
                 picture.Width = 8;
                 picture.Height = 8;
+                picture.Data = data;
                 highlightColorItem();
+                highlightFormatItem();
             } catch { }
         }
 
@@ -131,29 +161,25 @@ namespace Rippix {
             colorToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
         }
 
-        private ToolStripItem CreateFormatMenuItem(string name, object decoder) {
+        private ToolStripItem CreateFormatMenuItem(string name, Type decoderType) {
             var item = new ToolStripMenuItem();
             item.Text = name;
-            item.Tag = decoder;
+            item.Tag = decoderType;
             item.Click += (s, e) => {
                 var item2 = (ToolStripItem)s;
-                if (item2.Tag == null) return;
-                setPictureDecoder((IPictureDecoder)item2.Tag);
+                if (item2.Tag is Type) {
+                    var decoder = (IPictureDecoder)Activator.CreateInstance((Type)item2.Tag);
+                    setPictureDecoder(decoder);
+                }
             };
             return item;
         }
 
         private void CreateFormatMenuItems() {
             var list = new List<ToolStripItem>();
-            list.Add(CreateFormatMenuItem("Direct", new DirectDecoder()));
-            var d = new PackedDecoder() { Palette = new GrayscalePalette() };
-            d.PropertyChanged += new PropertyChangedEventHandler((s, e) => {
-                var decoder = (PackedDecoder)s;
-                ((GrayscalePalette)decoder.Palette).Length = 1 << decoder.ColorBPP;
-            });
-            list.Add(CreateFormatMenuItem("Packed", d));
-            list.Add(CreateFormatMenuItem("Indexed", new IndexedPictureFormat()));
-            list.Add(CreateFormatMenuItem("Amiga4", new TestPictureDecoder()));
+            list.Add(CreateFormatMenuItem("Direct", typeof(DirectDecoder)));
+            list.Add(CreateFormatMenuItem("Packed", typeof(PackedDecoder)));
+            list.Add(CreateFormatMenuItem("Planar (test)", typeof(TestPictureDecoder)));
             formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
         }
 

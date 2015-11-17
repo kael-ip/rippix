@@ -11,19 +11,13 @@ using Rippix.Model;
 namespace Rippix {
 
     public class PixelView : Control{
-        private IPictureAdapter format;
-        public IPictureAdapter Format {
+        private IPicture format;
+        public IPicture Format {
             get { return format; }
             set {
                 if (Equals(format, value)) return;
-                if (format != null) {
-                    format.Changed -= format_Changed;
-                }
                 format = value;
-                if (format != null) {
-                    format.Changed += format_Changed;
-                }
-                format_Changed(null, EventArgs.Empty);
+                Refresh();
             }
         }
         private int zoom;
@@ -45,9 +39,9 @@ namespace Rippix {
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
             BoxBackColor = Color.Violet;
         }
-        void format_Changed(object sender, EventArgs e) {
+        public override void Refresh() {
             isDirty = true;
-            Invalidate();
+            base.Refresh();
         }
         protected override void OnPaint(PaintEventArgs e) {
             //base.OnPaint(e);
@@ -59,9 +53,8 @@ namespace Rippix {
                 SolidBrush tbrush = new SolidBrush(this.BoxBackColor);
                 rect = new Rectangle(0, 0, bitmap.Width * (Zoom + 1), bitmap.Height * (Zoom + 1));
                 e.Graphics.FillRectangle(tbrush, rect);
-                //e.Graphics.DrawImageUnscaledAndClipped(bitmap, new Rectangle(Point.Empty, this.Size));
-                //e.Graphics.DrawImageUnscaled(bitmap, 0, 0);
                 e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
                 e.Graphics.DrawImage(bitmap, rect);
             }
             if (rect.Width < this.Width) {
@@ -83,7 +76,7 @@ namespace Rippix {
         int[] lineBuffer;
         long[] timings = new long[100];
         private void UpdateBitmap() {
-            if (Format == null || Format.Data == null) return;
+            if (Format == null) return;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             timings[0] = sw.ElapsedTicks;
@@ -120,7 +113,7 @@ namespace Rippix {
         }
         private void RenderScanLine(int[] lineBuffer, int scanline) {
             for (int i = 0; i < lineBuffer.Length; i++) {
-                lineBuffer[i] = Format.GetARGBColor(scanline, i);
+                lineBuffer[i] = Format.GetARGB(i, scanline);
             }
         }
         protected override bool IsInputKey(Keys keyData) {
@@ -129,80 +122,6 @@ namespace Rippix {
             if (keyData == Keys.Up || keyData == Keys.Down || keyData == Keys.Left || keyData == Keys.Right
                 || keyData == Keys.PageDown||keyData==Keys.PageUp|| keyData==Keys.Add|| keyData == Keys.Subtract) return true;
             return base.IsInputKey(keyData);
-        }
-        protected override void OnKeyDown(KeyEventArgs e) {
-            base.OnKeyDown(e);
-            if (Format == null || Format.Data == null) return;
-            int step = e.Control ? 8 : 1;
-            CorrectOffset(0);
-            int oldOffset = format.PicOffset;
-            int tWidth = Format.Width;
-            int tHeight = Format.Height;
-            if (e.Shift) {
-                switch (e.KeyCode) {
-                    case Keys.Up:
-                        tHeight -= step;
-                        break;
-                    case Keys.Down:
-                        tHeight += step;
-                        break;
-                    case Keys.Left:
-                        tWidth -= step;
-                        break;
-                    case Keys.Right:
-                        tWidth += step;
-                        break;
-                    case Keys.PageUp:
-                        break;
-                    case Keys.PageDown:
-                        break;
-                    case Keys.Add:
-                    case Keys.Subtract:
-                    case Keys.OemOpenBrackets:
-                    case Keys.OemCloseBrackets:
-                        break;
-                    case Keys.Z:
-                        this.Zoom--;
-                        break;
-                }
-            } else {
-                switch (e.KeyCode) {
-                    case Keys.Up:
-                        format.PicOffset -= format.LineStride * step;
-                        break;
-                    case Keys.Down:
-                        format.PicOffset += format.LineStride * step;
-                        break;
-                    case Keys.Left:
-                        format.PicOffset -= step;
-                        break;
-                    case Keys.Right:
-                        format.PicOffset += step;
-                        break;
-                    case Keys.PageUp:
-                        format.PicOffset -= format.FrameStride;
-                        break;
-                    case Keys.PageDown:
-                        format.PicOffset += format.FrameStride;
-                        break;
-                    case Keys.Add:
-                    case Keys.Subtract:
-                    case Keys.OemOpenBrackets:
-                    case Keys.OemCloseBrackets:
-                        break;
-                    case Keys.Z:
-                        this.Zoom++;
-                        break;
-                }
-            }
-            if (tWidth > 0) Format.Width = tWidth;
-            if (tHeight > 0) Format.Height = tHeight;
-            CorrectOffset(oldOffset);
-        }
-        private void CorrectOffset(int oldOffset) {
-            if (format.PicOffset < 0 || format.PicOffset >= Format.Data.Length) {
-                format.PicOffset = oldOffset;
-            }
         }
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);

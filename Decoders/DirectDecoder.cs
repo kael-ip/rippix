@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Rippix.Decoders {
 
-    public class DirectDecoder : IPictureDecoder, IPictureController, INotifyPropertyChanged {
+    public class DirectDecoder : IPictureDecoder, IPictureDecoderController, INotifyPropertyChanged {
         private int width;
         private int height;
         private int bypp;//bytes ber pixel
@@ -57,7 +57,7 @@ namespace Rippix.Decoders {
         }
         private int GetValue(byte[] data, int loffset, int poffset) {
             int offset = loffset + (poffset * bypp);
-            if (offset < 0 || offset + bypp >= data.Length) return 0;
+            if (data == null || offset < 0 || offset + bypp >= data.Length) return 0;
             int v = 0;
             switch (bypp) {
                 case 4:
@@ -98,19 +98,19 @@ namespace Rippix.Decoders {
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler Changed;
         #region IPictureController
-        int IPictureController.Width {
+        int IPictureDecoderController.Width {
             get { return this.width; }
             set { this.width = value; }
         }
-        int IPictureController.Height {
+        int IPictureDecoderController.Height {
             get { return this.height; }
             set { this.height = value; }
         }
-        int IPictureController.ColorBPP {
+        int IPictureDecoderController.ColorBPP {
             get { return this.ColorBPP; }
             set { this.ColorBPP = value; }
         }
-        ColorFormat IPictureController.ColorFormat {
+        ColorFormat IPictureDecoderController.ColorFormat {
             get { return this.ColorFormat; }
             set { this.ColorFormat = value; }
         }

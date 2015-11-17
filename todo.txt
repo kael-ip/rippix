@@ -16,6 +16,12 @@ TODO:
 .Pan h&v per pixel, not per byte (as an option in multibyte packing modes)
 .Some exotic modes
 
+.Image resource selection view
+.Palette resource selection view
+.Palette (current) view
+
+.Tile Map resource type
+
 Modes:
 [Direct/Indexed]
 [Packed/Planar/Composite]
