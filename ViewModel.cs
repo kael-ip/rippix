@@ -17,7 +17,7 @@ namespace Rippix {
         public IPicture Picture { get { return picture; } }
         public IPalette Palette { get { return palette; } }
         public ColorFormat ColorFormat { get { return picture == null ? null : picture.ColorFormat; } }
-        public IPictureDecoder Decoder { get { return picture == null ? null : picture.Decoder; } }
+        //public IPictureDecoder Decoder { get { return picture == null ? null : picture.Decoder; } }
         public IPictureAdapter PictureAdapter { get { return picture; } }
         public bool IsDocumentChanged { get { return document == null ? false : isDocumentChanged; } }
         public bool IsPictureChanged { get { return isPictureChanged; } }
@@ -34,6 +34,7 @@ namespace Rippix {
             }
         }
         public void SetDecoder(Type decoderType) {
+            if (picture != null && decoderType.IsInstanceOfType(picture.Decoder)) return;
             IPictureDecoder decoder = (IPictureDecoder)Activator.CreateInstance(decoderType);
             if (picture != null) {
                 picture.Changed -= new EventHandler(Format_Changed);
@@ -86,6 +87,17 @@ namespace Rippix {
             list.Add(new Preset("R8G8B8", new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
             list.Add(new Preset("B8G8R8", new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
             return list;
+        }
+        public bool IsCurrentPreset(object value) {
+            if (picture == null)return false;
+            if (value is Type) {
+                if (((Type)value).IsInstanceOfType(picture.Decoder))
+                    return true;
+            }
+            if (value is ColorFormat) {
+                return Equals(picture.ColorFormat, value);
+            }
+            return false;
         }
         public void OpenDataFile(string fileName) {
             document = Helper.LoadOrNew(fileName);

@@ -48,11 +48,7 @@ namespace Rippix {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
-                    ColorFormat cf = menuItem.Tag as ColorFormat;
-                    if (cf != null) {
-                        menuItem.Checked = (viewModel.Picture != null)
-                        && Equals(cf, viewModel.ColorFormat);
-                    }
+                    menuItem.Checked = viewModel.IsCurrentPreset(menuItem.Tag);
                 }
             }
         }
@@ -60,11 +56,7 @@ namespace Rippix {
             foreach (var item in formatToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
-                    Type decoderType = menuItem.Tag as Type;
-                    if (decoderType != null) {
-                        menuItem.Checked = (viewModel.Picture != null)
-                        && decoderType.IsInstanceOfType(viewModel.Decoder);
-                    }
+                    menuItem.Checked = viewModel.IsCurrentPreset(menuItem.Tag);
                 }
             }
         }
