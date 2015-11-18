@@ -8,6 +8,7 @@ namespace Rippix {
 
     class ViewModel {
         private Document document;
+        private bool isDocumentChanged;
         private bool isPictureChanged;
         private bool isPaletteChanged;
         private IPictureFormat picture;
@@ -18,6 +19,10 @@ namespace Rippix {
         public ColorFormat ColorFormat { get { return picture == null ? null : picture.ColorFormat; } }
         public IPictureDecoder Decoder { get { return picture == null ? null : picture.Decoder; } }
         public IPictureAdapter PictureAdapter { get { return picture; } }
+        public bool IsDocumentChanged { get { return document == null ? false : isDocumentChanged; } }
+        public bool IsPictureChanged { get { return isPictureChanged; } }
+        public bool IsPaletteChanged { get { return isPaletteChanged; } }
+
         public event EventHandler Changed;
 
         public ViewModel() {
@@ -83,7 +88,8 @@ namespace Rippix {
             return list;
         }
         public void OpenDataFile(string fileName) {
-            byte[] data = System.IO.File.ReadAllBytes(fileName);
+            document = Helper.LoadOrNew(fileName);
+            byte[] data = document.Data;
             if (picture == null) {
                 SetDecoder(typeof(DirectDecoder));
             }
@@ -93,6 +99,8 @@ namespace Rippix {
             picture.Data = data;
         }
         public void SaveModel() {
+            if (document == null) return;
+            Helper.Save(document);
         }
     }
 

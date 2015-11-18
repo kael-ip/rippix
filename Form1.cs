@@ -73,14 +73,18 @@ namespace Rippix {
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try {
                 viewModel.OpenDataFile(dlg.FileName);
-            } catch { }
+            } catch(Exception ex) {
+                ProcessError(ex);
+            }
         }
         private void savePictureToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog dlg = new SaveFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try {
                 pixelView1.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
-            } catch { }
+            } catch (Exception ex) {
+                ProcessError(ex);
+            }
         }
         private ToolStripItem CreateMenuItem(Preset preset, MenuEventHandler onExecute) {
             if (preset.Name == null) return new ToolStripSeparator();
@@ -116,7 +120,10 @@ namespace Rippix {
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
         }
-
+        private void ProcessError(Exception ex) {
+            System.Diagnostics.Trace.TraceError(ex.ToString());
+            MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
         #region
         const string helpText = @"
 Key controls:
