@@ -13,13 +13,12 @@ namespace Rippix {
     public partial class Form1 : Form {
 
         private ViewModel viewModel;
-        private IPictureFormat picture;
         private PictureControllerHelper inputController;
-        private IPalette palette;
 
         public Form1() {
             InitializeComponent();
             this.viewModel = new ViewModel();
+            this.viewModel.Changed += viewModel_Changed;
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
@@ -28,94 +27,54 @@ namespace Rippix {
             CreateFormatMenuItems();
             CreateColorMenuItems();
             inputController = new PictureControllerHelper(pixelView1);
-            palette = new GrayscalePalette();
         }
-
-        void setPictureDecoder(IPictureDecoder decoder) {
-            if (picture != null) {
-                picture.Changed -= new EventHandler(Format_Changed);
-            }
-            var old = picture;
-            picture = new PictureAdapter(decoder);
-            if (picture != null) {
-                if (old != null) {
-                    picture.Data = old.Data;
-                    picture.PicOffset = old.PicOffset;
-                    picture.Width = old.Width;
-                    picture.Height = old.Height;
-                    picture.ColorBPP = old.ColorBPP;
-                    picture.Zoom = old.Zoom;
-                };
-                if (decoder is INeedsPalette) {
-                    ((INeedsPalette)decoder).Palette = palette;
-                }
-                picture.Changed += new EventHandler(Format_Changed);
-                propertyGrid1.SelectedObject = picture;
-                propertyGrid2.SelectedObject = picture.ColorFormat;
-                Format_Changed(picture, EventArgs.Empty);
-            }
-            pixelView1.Format = picture;
-            inputController.Format = picture;
-        }
-
-        void Format_Changed(object sender, EventArgs e) {
+        void viewModel_Changed(object sender, EventArgs e) {
+            if (viewModel.Picture == null) return;
+            propertyGrid1.SelectedObject = viewModel.Picture;
+            propertyGrid2.SelectedObject = viewModel.ColorFormat;
+            inputController.Format = viewModel.PictureAdapter;
             if (inputController.Format != null) {
                 pixelView1.Zoom = inputController.Format.Zoom;
                 inputController.Format.Zoom = pixelView1.Zoom;
             }
-            ((GrayscalePalette)palette).Length = 1 << picture.ColorBPP;
             propertyGrid1.Refresh();
-            propertyGrid2.SelectedObject = picture.ColorFormat;
             propertyGrid2.Refresh();
             highlightColorItem();
             highlightFormatItem();
+            pixelView1.Format = viewModel.Picture;
             pixelView1.Refresh();
         }
-
         private void highlightColorItem() {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
                     ColorFormat cf = menuItem.Tag as ColorFormat;
                     if (cf != null) {
-                        menuItem.Checked = (picture != null)
-                        && cf.UsedBits == picture.ColorBPP
-                        && Equals(cf, picture.ColorFormat);
+                        menuItem.Checked = (viewModel.Picture != null)
+                        && Equals(cf, viewModel.ColorFormat);
                     }
                 }
             }
         }
-
         private void highlightFormatItem() {
             foreach (var item in formatToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
                     Type decoderType = menuItem.Tag as Type;
                     if (decoderType != null) {
-                        menuItem.Checked = (picture != null)
-                        && decoderType.IsInstanceOfType(picture.Decoder);
+                        menuItem.Checked = (viewModel.Picture != null)
+                        && decoderType.IsInstanceOfType(viewModel.Decoder);
                     }
                 }
             }
         }
-
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
             OpenFileDialog dlg = new OpenFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try {
-                byte[] data = System.IO.File.ReadAllBytes(dlg.FileName);
-                if (picture == null) {
-                    setPictureDecoder(new DirectDecoder());
-                }
-                picture.PicOffset = 0;
-                picture.Width = 8;
-                picture.Height = 8;
-                picture.Data = data;
-                highlightColorItem();
-                highlightFormatItem();
+                viewModel.OpenDataFile(dlg.FileName);
             } catch { }
         }
-
         private void savePictureToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog dlg = new SaveFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
@@ -123,9 +82,6 @@ namespace Rippix {
                 pixelView1.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
             } catch { }
         }
-
-        delegate void MenuEventHandler(ToolStripMenuItem item);
-
         private ToolStripItem CreateMenuItem(Preset preset, MenuEventHandler onExecute) {
             if (preset.Name == null) return new ToolStripSeparator();
             var item = new ToolStripMenuItem();
@@ -136,14 +92,11 @@ namespace Rippix {
             };
             return item;
         }
-
         private void CreateColorMenuItems() {
             colorToolStripMenuItem.DropDownItems.Clear();
             MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
-                if (item.Tag is ColorFormat && picture != null) {
-                    var cf = (ColorFormat)item.Tag;
-                    picture.ColorBPP = cf.UsedBits;
-                    picture.ColorFormat = new ColorFormat(cf);
+                if (item.Tag is ColorFormat) {
+                    viewModel.SetColorFormat((ColorFormat)item.Tag);
                 }
             };
             foreach (var preset in viewModel.GetAvailableColorFormats()) {
@@ -151,13 +104,11 @@ namespace Rippix {
                 colorToolStripMenuItem.DropDownItems.Add(item);
             }
         }
-
         private void CreateFormatMenuItems() {
             formatToolStripMenuItem.DropDownItems.Clear();
             MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
                 if (item.Tag is Type) {
-                    var decoder = (IPictureDecoder)Activator.CreateInstance((Type)item.Tag);
-                    setPictureDecoder(decoder);
+                    viewModel.SetDecoder((Type)item.Tag);
                 }
             };
             foreach (var preset in viewModel.GetAvailableDecoders()) {
@@ -183,4 +134,7 @@ Control mode - Step by 8 instead of 1
 ";
         #endregion
     }
+
+    delegate void MenuEventHandler(ToolStripMenuItem item);
+
 }
