@@ -34,6 +34,7 @@ namespace Rippix {
         public int BitsG { get { return bitsG; } set { SetIntPropertyValue("BitsG", ref bitsG, value, 0, 16, true); } }
         public int BitsB { get { return bitsB; } set { SetIntPropertyValue("BitsB", ref bitsB, value, 0, 16, true); } }
         public int BitsA { get { return bitsA; } set { SetIntPropertyValue("BitsA", ref bitsA, value, 0, 16, true); } }
+        public int UsedBits { get { return BitsA + BitsR + BitsG + BitsB; } }
 
         private void SetIntPropertyValue(string name, ref int store, int value, int min, int max, bool makeDirty) {
             if (value == store) return;

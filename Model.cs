@@ -194,7 +194,7 @@ namespace Rippix.Model {
                 s.Serialize(fs, obj, ns);
             }
         }
-        public static Document Load(string dataFileName) {
+        public static Document LoadOrNew(string dataFileName) {
             var data = File.ReadAllBytes(dataFileName);
             string sha1 = CalcHash(data);
             Document result = null;

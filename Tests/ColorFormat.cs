@@ -73,6 +73,19 @@ namespace Rippix.Tests {
                 Assert.AreEqual(cf, new ColorFormat("S15:1,10:5,5:5,0:5"));
             }
         }
+        [Test]
+        public void TestCalculatedBPP() {
+            Assert.AreEqual(32, new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8).UsedBits);
+            Assert.AreEqual(32, new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8).UsedBits);
+            Assert.AreEqual(32, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8).UsedBits);
+            Assert.AreEqual(32, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 8).UsedBits);
+            Assert.AreEqual(16, new ColorFormat(10, 5, 5, 5, 0, 5, 15, 1).UsedBits);
+            Assert.AreEqual(16, new ColorFormat(11, 5, 5, 6, 0, 5, 0, 0).UsedBits);
+            Assert.AreEqual(8, new ColorFormat(5, 3, 2, 3, 0, 2, 0, 0).UsedBits);
+            Assert.AreEqual(24, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0).UsedBits);
+            Assert.AreEqual(24, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0).UsedBits);
+
+        }
     }
 }
 #endif

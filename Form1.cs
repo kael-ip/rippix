@@ -19,6 +19,7 @@ namespace Rippix {
         public Form1() {
             InitializeComponent();
             this.Icon = Rippix.Properties.Resources.MainIcon;
+            this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
             propertyGrid1.Height = 300;
             toolTip1.SetToolTip(pixelView1, helpText);
@@ -73,11 +74,11 @@ namespace Rippix {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
                 ToolStripMenuItem menuItem = item as ToolStripMenuItem;
                 if (menuItem != null) {
-                    FormatPreset preset = menuItem.Tag as FormatPreset;
-                    if (preset != null) {
+                    ColorFormat cf = menuItem.Tag as ColorFormat;
+                    if (cf != null) {
                         menuItem.Checked = (picture != null)
-                        && preset.ColorBPP == picture.ColorBPP
-                        && Equals(preset.ColorFormat, picture.ColorFormat);
+                        && cf.UsedBits == picture.ColorBPP
+                        && Equals(cf, picture.ColorFormat);
                     }
                 }
             }
@@ -121,43 +122,34 @@ namespace Rippix {
             } catch { }
         }
 
-        class FormatPreset {
-            public int ColorBPP { get; private set; }
-            public ColorFormat ColorFormat { get; private set; }
-            public FormatPreset(int bpp, ColorFormat colorFormat) {
-                this.ColorBPP = bpp;
-                this.ColorFormat = colorFormat;
-            }
-        }
-
-        private ToolStripItem CreateColorMenuItem(string name, int bpp, ColorFormat colorFormat) {
+        private ToolStripItem CreateColorMenuItem(string name, ColorFormat colorFormat) {
             var item = new ToolStripMenuItem();
             item.Text = name;
-            item.Tag = new FormatPreset(bpp, colorFormat);
+            item.Tag = colorFormat;
             item.Click += (s, e) => {
                 var item2 = (ToolStripItem)s;
-                var preset = (FormatPreset)item2.Tag;
+                var cf = (ColorFormat)item2.Tag;
                 if (picture == null) return;
-                picture.ColorBPP = preset.ColorBPP;
-                picture.ColorFormat = new ColorFormat(preset.ColorFormat);
+                picture.ColorBPP = cf.UsedBits;
+                picture.ColorFormat = new ColorFormat(cf);
             };
             return item;
         }
 
         private void CreateColorMenuItems() {
             var list = new List<ToolStripItem>();
-            list.Add(CreateColorMenuItem("R8G8B8A8", 32, new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8)));
-            list.Add(CreateColorMenuItem("B8G8R8A8", 32, new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8)));
-            list.Add(CreateColorMenuItem("A8R8G8B8", 32, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8)));
-            list.Add(CreateColorMenuItem("A8B8G8R8", 32, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 8)));
+            list.Add(CreateColorMenuItem("R8G8B8A8", new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8)));
+            list.Add(CreateColorMenuItem("B8G8R8A8", new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8)));
+            list.Add(CreateColorMenuItem("A8R8G8B8", new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8)));
+            list.Add(CreateColorMenuItem("A8B8G8R8", new ColorFormat(0, 8, 8, 8, 16, 8, 24, 8)));
             list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("A1R5G5B5", 16, new ColorFormat(10, 5, 5, 5, 0, 5, 15, 1)));
-            list.Add(CreateColorMenuItem("R5G6B5", 16, new ColorFormat(11, 5, 5, 6, 0, 5, 0, 0)));
+            list.Add(CreateColorMenuItem("A1R5G5B5", new ColorFormat(10, 5, 5, 5, 0, 5, 15, 1)));
+            list.Add(CreateColorMenuItem("R5G6B5", new ColorFormat(11, 5, 5, 6, 0, 5, 0, 0)));
             list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("R3G3B2", 8, new ColorFormat(5, 3, 2, 3, 0, 2, 0, 0)));
+            list.Add(CreateColorMenuItem("R3G3B2", new ColorFormat(5, 3, 2, 3, 0, 2, 0, 0)));
             list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("R8G8B8", 24, new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
-            list.Add(CreateColorMenuItem("B8G8R8", 24, new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
+            list.Add(CreateColorMenuItem("R8G8B8", new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
+            list.Add(CreateColorMenuItem("B8G8R8", new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
             colorToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
         }
 
