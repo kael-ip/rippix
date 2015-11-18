@@ -12,12 +12,14 @@ using System.Windows.Forms;
 namespace Rippix {
     public partial class Form1 : Form {
 
+        private ViewModel viewModel;
         private IPictureFormat picture;
         private PictureControllerHelper inputController;
         private IPalette palette;
 
         public Form1() {
             InitializeComponent();
+            this.viewModel = new ViewModel();
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
@@ -122,57 +124,46 @@ namespace Rippix {
             } catch { }
         }
 
-        private ToolStripItem CreateColorMenuItem(string name, ColorFormat colorFormat) {
+        delegate void MenuEventHandler(ToolStripMenuItem item);
+
+        private ToolStripItem CreateMenuItem(Preset preset, MenuEventHandler onExecute) {
+            if (preset.Name == null) return new ToolStripSeparator();
             var item = new ToolStripMenuItem();
-            item.Text = name;
-            item.Tag = colorFormat;
+            item.Text = preset.Name;
+            item.Tag = preset.Value;
             item.Click += (s, e) => {
-                var item2 = (ToolStripItem)s;
-                var cf = (ColorFormat)item2.Tag;
-                if (picture == null) return;
-                picture.ColorBPP = cf.UsedBits;
-                picture.ColorFormat = new ColorFormat(cf);
+                onExecute((ToolStripMenuItem)s);
             };
             return item;
         }
 
         private void CreateColorMenuItems() {
-            var list = new List<ToolStripItem>();
-            list.Add(CreateColorMenuItem("R8G8B8A8", new ColorFormat(24, 8, 16, 8, 8, 8, 0, 8)));
-            list.Add(CreateColorMenuItem("B8G8R8A8", new ColorFormat(8, 8, 16, 8, 24, 8, 0, 8)));
-            list.Add(CreateColorMenuItem("A8R8G8B8", new ColorFormat(16, 8, 8, 8, 0, 8, 24, 8)));
-            list.Add(CreateColorMenuItem("A8B8G8R8", new ColorFormat(0, 8, 8, 8, 16, 8, 24, 8)));
-            list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("A1R5G5B5", new ColorFormat(10, 5, 5, 5, 0, 5, 15, 1)));
-            list.Add(CreateColorMenuItem("R5G6B5", new ColorFormat(11, 5, 5, 6, 0, 5, 0, 0)));
-            list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("R3G3B2", new ColorFormat(5, 3, 2, 3, 0, 2, 0, 0)));
-            list.Add(new ToolStripSeparator());
-            list.Add(CreateColorMenuItem("R8G8B8", new ColorFormat(16, 8, 8, 8, 0, 8, 24, 0)));
-            list.Add(CreateColorMenuItem("B8G8R8", new ColorFormat(0, 8, 8, 8, 16, 8, 24, 0)));
-            colorToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
-        }
-
-        private ToolStripItem CreateFormatMenuItem(string name, Type decoderType) {
-            var item = new ToolStripMenuItem();
-            item.Text = name;
-            item.Tag = decoderType;
-            item.Click += (s, e) => {
-                var item2 = (ToolStripItem)s;
-                if (item2.Tag is Type) {
-                    var decoder = (IPictureDecoder)Activator.CreateInstance((Type)item2.Tag);
-                    setPictureDecoder(decoder);
+            colorToolStripMenuItem.DropDownItems.Clear();
+            MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
+                if (item.Tag is ColorFormat && picture != null) {
+                    var cf = (ColorFormat)item.Tag;
+                    picture.ColorBPP = cf.UsedBits;
+                    picture.ColorFormat = new ColorFormat(cf);
                 }
             };
-            return item;
+            foreach (var preset in viewModel.GetAvailableColorFormats()) {
+                var item = CreateMenuItem(preset, onExecute);
+                colorToolStripMenuItem.DropDownItems.Add(item);
+            }
         }
 
         private void CreateFormatMenuItems() {
-            var list = new List<ToolStripItem>();
-            list.Add(CreateFormatMenuItem("Direct", typeof(DirectDecoder)));
-            list.Add(CreateFormatMenuItem("Packed", typeof(PackedDecoder)));
-            list.Add(CreateFormatMenuItem("Planar (test)", typeof(TestPictureDecoder)));
-            formatToolStripMenuItem.DropDownItems.AddRange(list.ToArray());
+            formatToolStripMenuItem.DropDownItems.Clear();
+            MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
+                if (item.Tag is Type) {
+                    var decoder = (IPictureDecoder)Activator.CreateInstance((Type)item.Tag);
+                    setPictureDecoder(decoder);
+                }
+            };
+            foreach (var preset in viewModel.GetAvailableDecoders()) {
+                var item = CreateMenuItem(preset, onExecute);
+                formatToolStripMenuItem.DropDownItems.Add(item);
+            }
         }
 
         #region
