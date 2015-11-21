@@ -116,13 +116,6 @@ namespace Rippix {
                 lineBuffer[i] = Format.GetARGB(i, scanline);
             }
         }
-        protected override bool IsInputKey(Keys keyData) {
-            keyData = keyData & ~Keys.Shift;
-            keyData = keyData & ~Keys.Control;
-            if (keyData == Keys.Up || keyData == Keys.Down || keyData == Keys.Left || keyData == Keys.Right
-                || keyData == Keys.PageDown||keyData==Keys.PageUp|| keyData==Keys.Add|| keyData == Keys.Subtract) return true;
-            return base.IsInputKey(keyData);
-        }
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
             this.Focus();

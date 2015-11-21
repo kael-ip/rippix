@@ -124,6 +124,7 @@ namespace Rippix {
         private Control control;
         public PictureControllerHelper(Control control) {
             this.control = control;
+            control.PreviewKeyDown += control_PreviewKeyDown;
             control.KeyDown += control_KeyDown;
         }
         private IPictureAdapter format;
@@ -132,6 +133,22 @@ namespace Rippix {
             set {
                 if (Equals(format, value)) return;
                 format = value;
+            }
+        }
+        void control_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) {
+            switch (e.KeyCode) {
+                case Keys.Up:
+                case Keys.Down:
+                case Keys.Left:
+                case Keys.Right:
+                case  Keys.PageUp:
+                case Keys.PageDown:
+                case Keys.Add:
+                case Keys.Subtract:
+                case Keys.OemOpenBrackets:
+                case Keys.OemCloseBrackets:
+                    e.IsInputKey = true;
+                    break;
             }
         }
         void control_KeyDown(object sender, KeyEventArgs e) {
