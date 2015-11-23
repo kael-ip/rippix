@@ -21,7 +21,7 @@ namespace Rippix {
             set { length = value; }
         }
         public int GetARGB(int index) {
-            if (index < 0 || index >= Length) return 0;
+            if (index < 0 || index >= Length || Length <= 1) return 0;
             var v = 255 * index / (Length - 1);
             v = ColorFormat.Pack(v, v, v, 255);
             return v;

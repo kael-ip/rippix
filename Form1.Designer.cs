@@ -36,6 +36,7 @@
             this.propertyGrid2 = new System.Windows.Forms.PropertyGrid();
             this.pixelView1 = new Rippix.PixelView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.pixelView2 = new Rippix.PixelView();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -103,9 +104,9 @@
             this.panel1.Controls.Add(this.propertyGrid2);
             this.panel1.Controls.Add(this.propertyGrid1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(357, 24);
+            this.panel1.Location = new System.Drawing.Point(357, 70);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(240, 238);
+            this.panel1.Size = new System.Drawing.Size(240, 192);
             this.panel1.TabIndex = 3;
             // 
             // propertyGrid2
@@ -114,7 +115,7 @@
             this.propertyGrid2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid2.Location = new System.Drawing.Point(0, 118);
             this.propertyGrid2.Name = "propertyGrid2";
-            this.propertyGrid2.Size = new System.Drawing.Size(240, 120);
+            this.propertyGrid2.Size = new System.Drawing.Size(240, 74);
             this.propertyGrid2.TabIndex = 2;
             this.propertyGrid2.ToolbarVisible = false;
             // 
@@ -123,20 +124,32 @@
             this.pixelView1.BoxBackColor = System.Drawing.Color.Violet;
             this.pixelView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pixelView1.Format = null;
-            this.pixelView1.Location = new System.Drawing.Point(0, 49);
+            this.pixelView1.Location = new System.Drawing.Point(0, 95);
             this.pixelView1.Name = "pixelView1";
-            this.pixelView1.Size = new System.Drawing.Size(357, 213);
+            this.pixelView1.Size = new System.Drawing.Size(357, 167);
             this.pixelView1.TabIndex = 2;
             this.pixelView1.Text = "pixelView1";
             this.pixelView1.Zoom = 0;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 70);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(357, 25);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // pixelView2
+            // 
+            this.pixelView2.BoxBackColor = System.Drawing.Color.Violet;
+            this.pixelView2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pixelView2.Format = null;
+            this.pixelView2.Location = new System.Drawing.Point(0, 24);
+            this.pixelView2.Name = "pixelView2";
+            this.pixelView2.Size = new System.Drawing.Size(597, 46);
+            this.pixelView2.TabIndex = 5;
+            this.pixelView2.Text = "pixelView2";
+            this.pixelView2.Zoom = 0;
             // 
             // Form1
             // 
@@ -146,6 +159,7 @@
             this.Controls.Add(this.pixelView1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.panel1);
+            this.Controls.Add(this.pixelView2);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -172,6 +186,7 @@
         private System.Windows.Forms.PropertyGrid propertyGrid2;
         private System.Windows.Forms.ToolStripMenuItem colorToolStripMenuItem;
         private System.Windows.Forms.ToolStrip toolStrip1;
+        private PixelView pixelView2;
     }
 }
 

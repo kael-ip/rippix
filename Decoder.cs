@@ -120,6 +120,32 @@ namespace Rippix {
         public event EventHandler Changed;
     }
 
+    public class PalettePictureAdapter : IPicture {
+        private IPalette palette;
+        public PalettePictureAdapter(IPalette palette) {
+            this.palette = palette;
+        }
+        public int Length { get; set; }
+        public int ImageWidth {
+            get { return Length/ImageHeight; }
+        }
+        public int ImageHeight {
+            get {
+                if (Length <= 16) return 1;
+                if (Length <= 32) return 2;
+                if (Length <= 64) return 2;
+                if (Length <= 128) return 4;
+                if (Length <= 256) return 4;
+                return 8;
+            }
+        }
+        public int GetARGB(int x, int y) {
+            if (x < 0 || y < 0) return 0;
+            if (x >= ImageWidth || y >= ImageHeight) return 0;
+            return palette.GetARGB(y * ImageWidth + x);
+        }
+    }
+
     public class TestPictureDecoder : INotifyPropertyChanged, IPictureDecoder, IPictureDecoderController {
         private int planesCount = 4;
         private int width = 40;

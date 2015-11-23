@@ -13,6 +13,7 @@ namespace Rippix {
         private bool isPaletteChanged;
         private IPictureFormat picture;
         private IPalette palette;
+        private IPicture palettePicture;
 
         public IPicture Picture { get { return picture; } }
         public IPalette Palette { get { return palette; } }
@@ -22,11 +23,12 @@ namespace Rippix {
         public bool IsDocumentChanged { get { return document == null ? false : isDocumentChanged; } }
         public bool IsPictureChanged { get { return isPictureChanged; } }
         public bool IsPaletteChanged { get { return isPaletteChanged; } }
-
+        public IPicture PalettePicture { get { return palettePicture; } }
         public event EventHandler Changed;
 
         public ViewModel() {
             palette = new GrayscalePalette();
+            palettePicture = new PalettePictureAdapter(Palette) { Length = 256 };
         }
         private void OnChanged() {
             if (Changed != null) {
@@ -63,6 +65,7 @@ namespace Rippix {
         }
         void Format_Changed(object sender, EventArgs e) {
             ((GrayscalePalette)palette).Length = 1 << picture.ColorBPP;
+            ((PalettePictureAdapter)PalettePicture).Length = ((GrayscalePalette)palette).Length;
             OnChanged();
         }
         public IList<Preset> GetAvailableDecoders() {

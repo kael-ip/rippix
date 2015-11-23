@@ -22,6 +22,7 @@ namespace Rippix {
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
+            pixelView2.Zoom = 16;
             propertyGrid1.Height = 300;
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
@@ -46,6 +47,10 @@ namespace Rippix {
             highlightFormatItem();
             pixelView1.Format = viewModel.Picture;
             pixelView1.Refresh();
+            pixelView2.Format = viewModel.PalettePicture;
+            pixelView2.Zoom = 8 - pixelView2.Format.ImageHeight;
+            pixelView2.Height = pixelView2.Format.ImageHeight << pixelView2.Zoom;
+            pixelView2.Refresh();
         }
         private void highlightColorItem() {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
