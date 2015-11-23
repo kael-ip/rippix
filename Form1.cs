@@ -3,7 +3,6 @@ using Rippix.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,8 @@ namespace Rippix {
     public partial class Form1 : Form {
 
         private ViewModel viewModel;
-        private PictureControllerHelper inputController;
+        private KeyboardSeekControlHelper inputController;
+        private ImageSeekController seekController;
 
         public Form1() {
             InitializeComponent();
@@ -26,16 +26,19 @@ namespace Rippix {
             toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
             CreateColorMenuItems();
-            inputController = new PictureControllerHelper(pixelView1);
+            CreateSeekItems();
+            seekController = new ImageSeekController();
+            inputController = new KeyboardSeekControlHelper(pixelView1);
+            inputController.Controller = seekController;
         }
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
             propertyGrid1.SelectedObject = viewModel.Picture;
             propertyGrid2.SelectedObject = viewModel.ColorFormat;
-            inputController.Format = viewModel.PictureAdapter;
-            if (inputController.Format != null) {
-                pixelView1.Zoom = inputController.Format.Zoom;
-                inputController.Format.Zoom = pixelView1.Zoom;
+            seekController.Format = viewModel.PictureAdapter;
+            if (seekController.Format != null) {
+                pixelView1.Zoom = seekController.Format.Zoom;
+                seekController.Format.Zoom = pixelView1.Zoom;
             }
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
@@ -111,6 +114,30 @@ namespace Rippix {
                 var item = CreateMenuItem(preset, onExecute);
                 formatToolStripMenuItem.DropDownItems.Add(item);
             }
+        }
+        private void CreateSeekItems() {
+            toolStrip1.Items.Clear();
+            toolStrip1.Items.Add(CreateSeekCommandItem("<", ImageSeekCommand.ChangeOffsetByte, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem(">", ImageSeekCommand.ChangeOffsetByte, 1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("<Line", ImageSeekCommand.ChangeOffsetLine, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("Line>", ImageSeekCommand.ChangeOffsetLine, 1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("<Frm", ImageSeekCommand.ChangeOffsetFrame, -1, false));
+            toolStrip1.Items.Add(CreateSeekCommandItem("Frm>", ImageSeekCommand.ChangeOffsetFrame, 1, false));
+            toolStrip1.Items.Add(CreateSeekCommandItem("W-", ImageSeekCommand.ChangeWidth, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("W+", ImageSeekCommand.ChangeWidth, 1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("H-", ImageSeekCommand.ChangeHeight, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("H+", ImageSeekCommand.ChangeHeight, 1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("Z-", ImageSeekCommand.ChangeZoom, -1, false));
+            toolStrip1.Items.Add(CreateSeekCommandItem("Z+", ImageSeekCommand.ChangeZoom, 1, false));
+        }
+        private ToolStripItem CreateSeekCommandItem(string caption, ImageSeekCommand cmd, int step, bool useLeap) {
+            var item = new ToolStripButton();
+            item.Text = caption;
+            item.Click += (s, e) => {
+                var leap = ((Control.ModifierKeys & Keys.Shift) != Keys.None) ? 8 : 1;
+                seekController.Execute(cmd, useLeap ? step * leap : step);
+            };
+            return item;
         }
         private void ProcessError(Exception ex) {
             System.Diagnostics.Trace.TraceError(ex.ToString());
