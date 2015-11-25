@@ -14,6 +14,7 @@ namespace Rippix {
         private ViewModel viewModel;
         private KeyboardSeekControlHelper inputController;
         private ImageSeekController seekController;
+        private int paletteViewHeightFactor = 5;
 
         public Form1() {
             InitializeComponent();
@@ -22,7 +23,7 @@ namespace Rippix {
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
-            pixelView2.Zoom = 16;
+            pixelView2.Height = (1 << paletteViewHeightFactor);
             propertyGrid1.Height = 300;
             CreateFormatMenuItems();
             CreateColorMenuItems();
@@ -48,8 +49,7 @@ namespace Rippix {
             pixelView1.Format = viewModel.Picture;
             pixelView1.Refresh();
             pixelView2.Format = viewModel.PalettePicture;
-            pixelView2.Zoom = 8 - pixelView2.Format.ImageHeight;
-            pixelView2.Height = pixelView2.Format.ImageHeight << pixelView2.Zoom;
+            pixelView2.Zoom = pixelView2.Height / viewModel.PalettePicture.ImageHeight - 1;
             pixelView2.Refresh();
         }
         private void highlightColorItem() {

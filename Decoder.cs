@@ -127,16 +127,17 @@ namespace Rippix {
         }
         public int Length { get; set; }
         public int ImageWidth {
-            get { return Length/ImageHeight; }
+            get { return Length / ImageHeight; }
         }
         public int ImageHeight {
+            get { return (1 << (3 - Zoom)); }
+        }
+        public int Zoom {
             get {
-                if (Length <= 16) return 1;
-                if (Length <= 32) return 2;
-                if (Length <= 64) return 2;
-                if (Length <= 128) return 4;
-                if (Length <= 256) return 4;
-                return 8;
+                if (Length <= 16) return 3;// 16*1
+                if (Length <= 64) return 2;// 32*2
+                if (Length <= 256) return 1;// 64*4
+                return 0;
             }
         }
         public int GetARGB(int x, int y) {
