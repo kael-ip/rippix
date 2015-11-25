@@ -24,13 +24,13 @@ namespace Rippix {
             this.ClientSize = new Size(800, 600);
             pixelView2.Zoom = 16;
             propertyGrid1.Height = 300;
-            toolTip1.SetToolTip(pixelView1, helpText);
             CreateFormatMenuItems();
             CreateColorMenuItems();
             CreateSeekItems();
             seekController = new ImageSeekController();
             inputController = new KeyboardSeekControlHelper(pixelView1);
             inputController.Controller = seekController;
+            toolTip1.SetToolTip(pixelView1, inputController.HelpText);
         }
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
@@ -148,22 +148,6 @@ namespace Rippix {
             System.Diagnostics.Trace.TraceError(ex.ToString());
             MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        #region
-        const string helpText = @"
-Key controls:
-Up, Down - Pan vertically
-Left, Right - Pan horizontally
-PageUp, PageDown - Pan vertically by page
-Z - Zoom in
-
-Shift mode:
-Up, Down - Change picture height
-Left, Right - Change picture width
-Z - Zoom out
-
-Control mode - Step by 8 instead of 1
-";
-        #endregion
     }
 
     delegate void MenuEventHandler(ToolStripMenuItem item);

@@ -95,6 +95,21 @@ namespace Rippix {
             }
             control.Refresh();
         }
+        public readonly string HelpText = @"
+Key controls:
+Up, Down - Pan vertically
+Left, Right - Pan horizontally
+PageUp, PageDown - Pan vertically by page
+Z - Zoom in
+
+Shift mode:
+Up, Down - Change picture height
+Left, Right - Change picture width
+Z - Zoom out
+
+Control mode - Step by 8 instead of 1
+";
+
     }
 
 }
