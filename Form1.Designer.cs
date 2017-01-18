@@ -30,15 +30,9 @@
             this.savePictureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.formatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.propertyGrid2 = new System.Windows.Forms.PropertyGrid();
-            this.pixelView1 = new Rippix.PixelView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.pixelView2 = new Rippix.PixelView();
+            this.panelMain = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -88,85 +82,26 @@
             this.colorToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.colorToolStripMenuItem.Text = "Color";
             // 
-            // propertyGrid1
+            // panelMain
             // 
-            this.propertyGrid1.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.propertyGrid1.HelpVisible = false;
-            this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(240, 118);
-            this.propertyGrid1.TabIndex = 1;
-            this.propertyGrid1.ToolbarVisible = false;
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.propertyGrid2);
-            this.panel1.Controls.Add(this.propertyGrid1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(357, 70);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(240, 192);
-            this.panel1.TabIndex = 3;
-            // 
-            // propertyGrid2
-            // 
-            this.propertyGrid2.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.propertyGrid2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGrid2.Location = new System.Drawing.Point(0, 118);
-            this.propertyGrid2.Name = "propertyGrid2";
-            this.propertyGrid2.Size = new System.Drawing.Size(240, 74);
-            this.propertyGrid2.TabIndex = 2;
-            this.propertyGrid2.ToolbarVisible = false;
-            // 
-            // pixelView1
-            // 
-            this.pixelView1.BoxBackColor = System.Drawing.Color.Violet;
-            this.pixelView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pixelView1.Format = null;
-            this.pixelView1.Location = new System.Drawing.Point(0, 95);
-            this.pixelView1.Name = "pixelView1";
-            this.pixelView1.Size = new System.Drawing.Size(357, 167);
-            this.pixelView1.TabIndex = 2;
-            this.pixelView1.Text = "pixelView1";
-            this.pixelView1.Zoom = 0;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Location = new System.Drawing.Point(0, 70);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(357, 25);
-            this.toolStrip1.TabIndex = 4;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // pixelView2
-            // 
-            this.pixelView2.BoxBackColor = System.Drawing.Color.Violet;
-            this.pixelView2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pixelView2.Format = null;
-            this.pixelView2.Location = new System.Drawing.Point(0, 24);
-            this.pixelView2.Name = "pixelView2";
-            this.pixelView2.Size = new System.Drawing.Size(597, 46);
-            this.pixelView2.TabIndex = 5;
-            this.pixelView2.Text = "pixelView2";
-            this.pixelView2.Zoom = 0;
+            this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelMain.Location = new System.Drawing.Point(0, 24);
+            this.panelMain.Name = "panelMain";
+            this.panelMain.Size = new System.Drawing.Size(597, 238);
+            this.panelMain.TabIndex = 1;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(597, 262);
-            this.Controls.Add(this.pixelView1);
-            this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.pixelView2);
+            this.Controls.Add(this.panelMain);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -178,15 +113,10 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem savePictureToolStripMenuItem;
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
-        private PixelView pixelView1;
         private System.Windows.Forms.ToolStripMenuItem formatToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.PropertyGrid propertyGrid2;
         private System.Windows.Forms.ToolStripMenuItem colorToolStripMenuItem;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private PixelView pixelView2;
+        private System.Windows.Forms.Panel panelMain;
     }
 }
 

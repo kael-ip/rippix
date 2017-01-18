@@ -16,8 +16,15 @@ namespace Rippix {
         private ImageSeekController seekController;
         private int paletteViewHeightFactor = 5;
 
+        private PropertyGrid propertyGrid1;
+        private PropertyGrid propertyGrid2;
+        private PixelView pixelView1;
+        private PixelView pixelView2;
+        private ToolStrip toolStrip1;
+
         public Form1() {
             InitializeComponent();
+            CreateComponents();
             this.viewModel = new ViewModel();
             this.viewModel.Changed += viewModel_Changed;
             this.Icon = Rippix.Properties.Resources.MainIcon;
@@ -32,6 +39,31 @@ namespace Rippix {
             inputController = new KeyboardSeekControlHelper(pixelView1);
             inputController.Controller = seekController;
             toolTip1.SetToolTip(pixelView1, inputController.HelpText);
+        }
+        void CreateComponents() {
+            this.propertyGrid1 = new PropertyGrid() {
+                HelpVisible = false,
+                ToolbarVisible = false,
+                Dock = DockStyle.Top
+            };
+            this.propertyGrid2 = new PropertyGrid() {
+                ToolbarVisible = false,
+                Dock = DockStyle.Fill
+            };
+            var panelRight = new Panel(){
+                Dock = DockStyle.Right
+            };
+            panelRight.Controls.Add(this.propertyGrid2);
+            panelRight.Controls.Add(this.propertyGrid1);
+            this.pixelView1 = new PixelView() { Dock = DockStyle.Fill };
+            this.pixelView2 = new PixelView() { Dock = DockStyle.Top };
+            this.toolStrip1 = new ToolStrip();
+            panelMain.Controls.Add(this.pixelView1);
+            panelMain.Controls.Add(this.toolStrip1);
+            panelMain.Controls.Add(new Splitter() { Dock = DockStyle.Right });
+            panelMain.Controls.Add(panelRight);
+            panelMain.Controls.Add(this.pixelView2);
+
         }
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
