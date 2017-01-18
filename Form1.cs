@@ -18,9 +18,12 @@ namespace Rippix {
 
         private PropertyGrid propertyGrid1;
         private PropertyGrid propertyGrid2;
-        private PixelView pixelView1;
-        private PixelView pixelView2;
+        private PixelView pixelViewPicture;
+        private PixelView pixelViewPalette;
         private ToolStrip toolStrip1;
+        private TabControl tabControl;
+        private ToolStripMenuItem colorToolStripMenuItem;
+        private ToolStripMenuItem formatToolStripMenuItem;
 
         public Form1() {
             InitializeComponent();
@@ -30,15 +33,16 @@ namespace Rippix {
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
-            pixelView2.Height = (1 << paletteViewHeightFactor);
+            pixelViewPalette.Height = (1 << paletteViewHeightFactor);
             propertyGrid1.Height = 300;
-            CreateFormatMenuItems();
-            CreateColorMenuItems();
+            CreateFileMenuItems();
+            formatToolStripMenuItem = CreateFormatMenuItems();
+            colorToolStripMenuItem = CreateColorMenuItems();
             CreateSeekItems();
             seekController = new ImageSeekController();
-            inputController = new KeyboardSeekControlHelper(pixelView1);
+            inputController = new KeyboardSeekControlHelper(pixelViewPicture);
             inputController.Controller = seekController;
-            toolTip1.SetToolTip(pixelView1, inputController.HelpText);
+            toolTip1.SetToolTip(pixelViewPicture, inputController.HelpText);
         }
         void CreateComponents() {
             this.propertyGrid1 = new PropertyGrid() {
@@ -50,19 +54,23 @@ namespace Rippix {
                 ToolbarVisible = false,
                 Dock = DockStyle.Fill
             };
+            this.tabControl = new TabControl() { Dock = DockStyle.Fill };
+            this.tabControl.TabPages.Add("Properties");
+            this.tabControl.TabPages.Add("Bookmarks");
             var panelRight = new Panel(){
                 Dock = DockStyle.Right
             };
-            panelRight.Controls.Add(this.propertyGrid2);
-            panelRight.Controls.Add(this.propertyGrid1);
-            this.pixelView1 = new PixelView() { Dock = DockStyle.Fill };
-            this.pixelView2 = new PixelView() { Dock = DockStyle.Top };
+            tabControl.TabPages[0].Controls.Add(this.propertyGrid2);
+            tabControl.TabPages[0].Controls.Add(this.propertyGrid1);
+            panelRight.Controls.Add(tabControl);
+            this.pixelViewPicture = new PixelView() { Dock = DockStyle.Fill };
+            this.pixelViewPalette = new PixelView() { Dock = DockStyle.Top };
             this.toolStrip1 = new ToolStrip();
-            panelMain.Controls.Add(this.pixelView1);
+            panelMain.Controls.Add(this.pixelViewPicture);
             panelMain.Controls.Add(this.toolStrip1);
             panelMain.Controls.Add(new Splitter() { Dock = DockStyle.Right });
             panelMain.Controls.Add(panelRight);
-            panelMain.Controls.Add(this.pixelView2);
+            panelMain.Controls.Add(this.pixelViewPalette);
 
         }
         void viewModel_Changed(object sender, EventArgs e) {
@@ -71,18 +79,18 @@ namespace Rippix {
             propertyGrid2.SelectedObject = viewModel.ColorFormat;
             seekController.Format = viewModel.PictureAdapter;
             if (seekController.Format != null) {
-                pixelView1.Zoom = seekController.Format.Zoom;
-                seekController.Format.Zoom = pixelView1.Zoom;
+                pixelViewPicture.Zoom = seekController.Format.Zoom;
+                seekController.Format.Zoom = pixelViewPicture.Zoom;
             }
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
             highlightColorItem();
             highlightFormatItem();
-            pixelView1.Format = viewModel.Picture;
-            pixelView1.Refresh();
-            pixelView2.Format = viewModel.PalettePicture;
-            pixelView2.Zoom = pixelView2.Height / viewModel.PalettePicture.ImageHeight - 1;
-            pixelView2.Refresh();
+            pixelViewPicture.Format = viewModel.Picture;
+            pixelViewPicture.Refresh();
+            pixelViewPalette.Format = viewModel.PalettePicture;
+            pixelViewPalette.Zoom = pixelViewPalette.Height / viewModel.PalettePicture.ImageHeight - 1;
+            pixelViewPalette.Refresh();
         }
         private void highlightColorItem() {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
@@ -113,7 +121,7 @@ namespace Rippix {
             SaveFileDialog dlg = new SaveFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try {
-                pixelView1.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                pixelViewPicture.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
             } catch (Exception ex) {
                 ProcessError(ex);
             }
@@ -128,8 +136,23 @@ namespace Rippix {
             };
             return item;
         }
-        private void CreateColorMenuItems() {
-            colorToolStripMenuItem.DropDownItems.Clear();
+        private void CreateFileMenuItems() {
+            var menuItem = new ToolStripMenuItem("File");
+            {
+                var item = new ToolStripMenuItem("Open");
+                item.Click += openToolStripMenuItem_Click;
+                menuItem.DropDownItems.Add(item);
+            }
+            {
+                var item = new ToolStripMenuItem("Save Picture");
+                item.Click += savePictureToolStripMenuItem_Click;
+                menuItem.DropDownItems.Add(item);
+            }
+            menuStrip.Items.Add(menuItem);
+        }
+        private ToolStripMenuItem CreateColorMenuItems() {
+            var menuItem = new ToolStripMenuItem("Color");
+            menuItem.DropDownItems.Clear();
             MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
                 if (item.Tag is ColorFormat) {
                     viewModel.SetColorFormat((ColorFormat)item.Tag);
@@ -137,11 +160,14 @@ namespace Rippix {
             };
             foreach (var preset in viewModel.GetAvailableColorFormats()) {
                 var item = CreateMenuItem(preset, onExecute);
-                colorToolStripMenuItem.DropDownItems.Add(item);
+                menuItem.DropDownItems.Add(item);
             }
+            menuStrip.Items.Add(menuItem);
+            return menuItem;
         }
-        private void CreateFormatMenuItems() {
-            formatToolStripMenuItem.DropDownItems.Clear();
+        private ToolStripMenuItem CreateFormatMenuItems() {
+            var menuItem = new ToolStripMenuItem("Format");
+            menuItem.DropDownItems.Clear();
             MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
                 if (item.Tag is Type) {
                     viewModel.SetDecoder((Type)item.Tag);
@@ -149,8 +175,10 @@ namespace Rippix {
             };
             foreach (var preset in viewModel.GetAvailableDecoders()) {
                 var item = CreateMenuItem(preset, onExecute);
-                formatToolStripMenuItem.DropDownItems.Add(item);
+                menuItem.DropDownItems.Add(item);
             }
+            menuStrip.Items.Add(menuItem);
+            return menuItem;
         }
         private void CreateSeekItems() {
             toolStrip1.Items.Clear();
