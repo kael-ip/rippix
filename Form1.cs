@@ -24,6 +24,7 @@ namespace Rippix {
         private TabControl tabControl;
         private ToolStripMenuItem colorToolStripMenuItem;
         private ToolStripMenuItem formatToolStripMenuItem;
+        private ListBox listBoxResources;
 
         public Form1() {
             InitializeComponent();
@@ -33,8 +34,6 @@ namespace Rippix {
             this.Icon = Rippix.Properties.Resources.MainIcon;
             this.Text = "Rippix";
             this.ClientSize = new Size(800, 600);
-            pixelViewPalette.Height = (1 << paletteViewHeightFactor);
-            propertyGrid1.Height = 300;
             CreateFileMenuItems();
             formatToolStripMenuItem = CreateFormatMenuItems();
             colorToolStripMenuItem = CreateColorMenuItems();
@@ -50,6 +49,7 @@ namespace Rippix {
                 ToolbarVisible = false,
                 Dock = DockStyle.Top
             };
+            propertyGrid1.Height = 300;
             this.propertyGrid2 = new PropertyGrid() {
                 ToolbarVisible = false,
                 Dock = DockStyle.Fill
@@ -62,9 +62,12 @@ namespace Rippix {
             };
             tabControl.TabPages[0].Controls.Add(this.propertyGrid2);
             tabControl.TabPages[0].Controls.Add(this.propertyGrid1);
+            CreateResourceListBox();
+            tabControl.TabPages[1].Controls.Add(this.listBoxResources);
             panelRight.Controls.Add(tabControl);
             this.pixelViewPicture = new PixelView() { Dock = DockStyle.Fill };
             this.pixelViewPalette = new PixelView() { Dock = DockStyle.Top };
+            pixelViewPalette.Height = (1 << paletteViewHeightFactor);
             this.toolStrip1 = new ToolStrip();
             panelMain.Controls.Add(this.pixelViewPicture);
             panelMain.Controls.Add(this.toolStrip1);
@@ -72,6 +75,22 @@ namespace Rippix {
             panelMain.Controls.Add(panelRight);
             panelMain.Controls.Add(this.pixelViewPalette);
 
+        }
+        void CreateResourceListBox() {
+            listBoxResources = new ListBox() { Dock = DockStyle.Fill };
+            listBoxResources.SelectionMode = SelectionMode.None;
+            listBoxResources.MouseClick += listBoxResources_MouseClick;
+            listBoxResources.ValueMember = "Offset";
+            listBoxResources.DisplayMember = "Name";
+        }
+        void listBoxResources_MouseClick(object sender, MouseEventArgs e) {
+            var index = listBoxResources.IndexFromPoint(e.Location);
+            if (index >= 0 && e.Button == System.Windows.Forms.MouseButtons.Left) {
+                viewModel.BookmarkLoad(index);
+            }
+        }
+        private void bookmarkMenuItem_Click(object sender, EventArgs e) {
+            viewModel.BookmarkStore();
         }
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
@@ -91,6 +110,8 @@ namespace Rippix {
             pixelViewPalette.Format = viewModel.PalettePicture;
             pixelViewPalette.Zoom = pixelViewPalette.Height / viewModel.PalettePicture.ImageHeight - 1;
             pixelViewPalette.Refresh();
+            listBoxResources.DataSource = viewModel.Resources;
+            listBoxResources.Refresh();
         }
         private void highlightColorItem() {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {
@@ -148,6 +169,12 @@ namespace Rippix {
                 item.Click += savePictureToolStripMenuItem_Click;
                 menuItem.DropDownItems.Add(item);
             }
+            menuItem.DropDownItems.Add(new ToolStripSeparator());
+            {
+                var item = new ToolStripMenuItem("Bookmark this");
+                item.Click += bookmarkMenuItem_Click;
+                menuItem.DropDownItems.Add(item);
+            }
             menuStrip.Items.Add(menuItem);
         }
         private ToolStripMenuItem CreateColorMenuItems() {
@@ -169,8 +196,8 @@ namespace Rippix {
             var menuItem = new ToolStripMenuItem("Format");
             menuItem.DropDownItems.Clear();
             MenuEventHandler onExecute = delegate(ToolStripMenuItem item) {
-                if (item.Tag is Type) {
-                    viewModel.SetDecoder((Type)item.Tag);
+                if (item.Tag is string) {
+                    viewModel.SetDecoder((string)item.Tag);
                 }
             };
             foreach (var preset in viewModel.GetAvailableDecoders()) {

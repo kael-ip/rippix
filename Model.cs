@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,14 +35,32 @@ namespace Rippix.Model {
                 return currentResource;
             }
         }
-        private List<Resource> resources;
-        public List<Resource> Resources { get { return resources; } }
+        private IList<Resource> resources;
+        public IList<Resource> Resources { get { return resources; } }
         public Document() {
-            this.resources = new List<Resource>();
+            this.resources = new BindingList<Resource>();
         }
         internal void SetData(byte[] data, string sha1) {
             this.data = data;
             this.SHA1 = sha1;
+        }
+        public Resource FindResource(int offset) {
+            return Resources.FirstOrDefault(o => o.Offset == offset);
+        }
+        public void StoreResource() {
+            var resource = FindResource(CurrentResource.Offset);
+            if (resource == null) {
+                resource = CurrentResource.Clone();
+                resource.Name = string.Format("@{0:x8} ({0:d})", resource.Offset);
+                Resources.Add(resource);
+            } else {
+                resource.Assign(CurrentResource);
+            }
+        }
+        public void LoadResource(int index) {
+            if (index < 0 || index >= Resources.Count) return;
+            var resource = Resources[index];
+            CurrentResource.Assign(resource);
         }
     }
 
@@ -53,15 +72,27 @@ namespace Rippix.Model {
         public Format Format { get; set; }
         public Resource Clone() {
             Resource clone = new Resource();
-            clone.Offset = this.Offset;
-            clone.Format = this.Format.Clone();
+            clone.Assign(this);
             return clone;
+        }
+        public void Assign(Resource source) {
+            this.Offset = source.Offset;
+            this.Format = source.Format.Clone();
         }
     }
 
     public class Format {
+        private string code;
         [XmlAttribute]
-        public string Code { get; set; }
+        public string Code {
+            get { return code; }
+            set {
+                if (code == value) return;
+                code = value;
+                Parameters.GetHashCode();
+                decoder = null;
+            }
+        }
         private List<Parameter> parameters;
         public List<Parameter> Parameters {
             get {
@@ -90,7 +121,7 @@ namespace Rippix.Model {
             Format clone = new Format();
             clone.Code = this.Code;
             foreach (var p in Parameters) {
-                clone.Parameters.Add(new Parameter(p.Name, p.Value));
+                clone.Parameters.Poke(p.Name, p.Value);
             }
             return clone;
         }

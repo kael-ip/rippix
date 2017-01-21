@@ -24,8 +24,14 @@ namespace Rippix {
         public bool IsPictureChanged { get { return isPictureChanged; } }
         public bool IsPaletteChanged { get { return isPaletteChanged; } }
         public IPicture PalettePicture { get { return palettePicture; } }
+        public IList<Resource> Resources { get { return document == null ? null : document.Resources; } }
         public event EventHandler Changed;
 
+        static ViewModel() {
+            DecoderFactory.Instance.Register<DirectDecoder>("Direct");
+            DecoderFactory.Instance.Register<PackedDecoder>("Packed");
+            DecoderFactory.Instance.Register<TestPictureDecoder>("$Planar$0.1");
+        }
         public ViewModel() {
             palette = new GrayscalePalette();
             palettePicture = new PalettePictureAdapter(Palette) { Length = 256 };
@@ -35,27 +41,32 @@ namespace Rippix {
                 Changed(this, EventArgs.Empty);
             }
         }
-        public void SetDecoder(Type decoderType) {
-            if (picture != null && decoderType.IsInstanceOfType(picture.Decoder)) return;
-            IPictureDecoder decoder = (IPictureDecoder)Activator.CreateInstance(decoderType);
+        private void RefreshAdapter() {
+            IPictureDecoder decoder = document.CurrentResource.Format.Decoder as IPictureDecoder;
+            if (decoder == null) {
+                document.CurrentResource.Format.Code = "Direct";
+                decoder = document.CurrentResource.Format.Decoder as IPictureDecoder;
+            }
             if (picture != null) {
                 picture.Changed -= new EventHandler(Format_Changed);
             }
             var old = picture;
             picture = new PictureAdapter(decoder);
+            picture.Data = document.Data;
+            picture.PicOffset = document.CurrentResource.Offset;
             if (old != null) {
-                picture.Data = old.Data;
-                picture.PicOffset = old.PicOffset;
-                picture.Width = old.Width;
-                picture.Height = old.Height;
-                picture.ColorBPP = old.ColorBPP;
                 picture.Zoom = old.Zoom;
-            };
+            }
             if (decoder is INeedsPalette) {
                 ((INeedsPalette)decoder).Palette = palette;
             }
             picture.Changed += new EventHandler(Format_Changed);
             Format_Changed(picture, EventArgs.Empty);
+        }
+        public void SetDecoder(string decoderCode) {
+            if (Equals(decoderCode, document.CurrentResource.Format.Code)) return;
+            document.CurrentResource.Format.Code = decoderCode;
+            RefreshAdapter();
         }
         public void SetColorFormat(ColorFormat colorFormat) {
             if (picture == null) return;
@@ -64,15 +75,20 @@ namespace Rippix {
             OnChanged();
         }
         void Format_Changed(object sender, EventArgs e) {
-            ((GrayscalePalette)palette).Length = 1 << picture.ColorBPP;
+            document.CurrentResource.Offset = picture.PicOffset;
+            int plength = 1;
+            if (picture.Decoder is INeedsPalette) {
+                plength = 1 << picture.ColorBPP;
+            }
+            ((GrayscalePalette)palette).Length = plength;
             ((PalettePictureAdapter)PalettePicture).Length = ((GrayscalePalette)palette).Length;
             OnChanged();
         }
         public IList<Preset> GetAvailableDecoders() {
             var list = new List<Preset>();
-            list.Add(new Preset("Direct", typeof(DirectDecoder)));
-            list.Add(new Preset("Packed", typeof(PackedDecoder)));
-            list.Add(new Preset("Planar (test)", typeof(TestPictureDecoder)));
+            list.Add(new Preset("Direct", "Direct"));
+            list.Add(new Preset("Packed", "Packed"));
+            list.Add(new Preset("Planar (test)", "$Planar$0.1"));
             return list;
         }
         public IList<Preset> GetAvailableColorFormats() {
@@ -92,10 +108,9 @@ namespace Rippix {
             return list;
         }
         public bool IsCurrentPreset(object value) {
-            if (picture == null)return false;
-            if (value is Type) {
-                if (((Type)value).IsInstanceOfType(picture.Decoder))
-                    return true;
+            if (picture == null) return false;
+            if (value is string) {
+                return Equals(document.CurrentResource.Format.Code, value);
             }
             if (value is ColorFormat) {
                 return Equals(picture.ColorFormat, value);
@@ -105,17 +120,28 @@ namespace Rippix {
         public void OpenDataFile(string fileName) {
             document = Helper.LoadOrNew(fileName);
             byte[] data = document.Data;
-            if (picture == null) {
-                SetDecoder(typeof(DirectDecoder));
+            RefreshAdapter();
+            if (document.Resources.Count == 0) {
+                picture.PicOffset = 0;
+                picture.Width = 8;
+                picture.Height = 8;
             }
-            picture.PicOffset = 0;
-            picture.Width = 8;
-            picture.Height = 8;
-            picture.Data = data;
         }
         public void SaveModel() {
             if (document == null) return;
             Helper.Save(document);
+        }
+        public void BookmarkStore() {
+            if (document == null) return;
+            document.StoreResource();
+            //SaveModel();
+            OnChanged();
+        }
+        public void BookmarkLoad(int index) {
+            if (document == null) return;
+            document.LoadResource(index);
+            RefreshAdapter();
+            OnChanged();
         }
     }
 
