@@ -134,7 +134,6 @@ namespace Rippix {
         public void BookmarkStore() {
             if (document == null) return;
             document.StoreResource();
-            //SaveModel();
             OnChanged();
         }
         public void BookmarkLoad(int index) {

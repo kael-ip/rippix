@@ -35,8 +35,8 @@ namespace Rippix.Model {
                 return currentResource;
             }
         }
-        private IList<Resource> resources;
-        public IList<Resource> Resources { get { return resources; } }
+        private BindingList<Resource> resources;
+        public BindingList<Resource> Resources { get { return resources; } }
         public Document() {
             this.resources = new BindingList<Resource>();
         }
@@ -243,10 +243,12 @@ namespace Rippix.Model {
         }
         public static void Save(Document document) {
             string fileName = GetProjectFileName(document.SHA1, document.FileName);
+            Directory.CreateDirectory(new FileInfo(fileName).Directory.FullName);
             Backup(fileName);
             Save(document, fileName);
         }
         private static void Backup(string fileName) {
+            if (!File.Exists(fileName)) return;
             int i = 1;
             while (true) {
                 string bakFileName = string.Concat(fileName, string.Format(".bak{0:d}", i));

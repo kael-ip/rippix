@@ -91,6 +91,9 @@ namespace Rippix {
         }
         private void bookmarkMenuItem_Click(object sender, EventArgs e) {
             viewModel.BookmarkStore();
+            SafeExecute(delegate {
+                viewModel.SaveModel();
+            });
         }
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
@@ -132,20 +135,16 @@ namespace Rippix {
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
             OpenFileDialog dlg = new OpenFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
-            try {
+            SafeExecute(delegate {
                 viewModel.OpenDataFile(dlg.FileName);
-            } catch(Exception ex) {
-                ProcessError(ex);
-            }
+            });
         }
         private void savePictureToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog dlg = new SaveFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
-            try {
+            SafeExecute(delegate {
                 pixelViewPicture.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
-            } catch (Exception ex) {
-                ProcessError(ex);
-            }
+            });
         }
         private ToolStripItem CreateMenuItem(Preset preset, MenuEventHandler onExecute) {
             if (preset.Name == null) return new ToolStripSeparator();
@@ -230,6 +229,13 @@ namespace Rippix {
                 seekController.Execute(cmd, useLeap ? step * leap : step);
             };
             return item;
+        }
+        private void SafeExecute(Action action) {
+            try {
+                action();
+            } catch (Exception ex) {
+                ProcessError(ex);
+            }
         }
         private void ProcessError(Exception ex) {
             System.Diagnostics.Trace.TraceError(ex.ToString());
