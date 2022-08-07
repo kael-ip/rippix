@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
+﻿#if DEBUG
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#if DEBUG
 namespace Rippix.Tests {
     public class SerializationTests {
         [Test]

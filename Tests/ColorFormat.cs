@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿#if DEBUG
+using NUnit.Framework;
 using System;
 using System.Drawing;
 
-#if DEBUG
 namespace Rippix.Tests {
     public class ColorFormatTests {
         [Test]
