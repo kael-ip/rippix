@@ -192,6 +192,7 @@ namespace Rippix.Model {
     public interface IDecoder {
         void ReadParameters(IList<Parameter> parameters);
         void WriteParameters(IList<Parameter> parameters);
+        object Properties { get; }
     }
 
     public interface IPictureDecoder : IDecoder {

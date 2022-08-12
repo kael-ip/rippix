@@ -17,6 +17,7 @@ namespace Rippix {
 
         public IPicture Picture { get { return picture; } }
         public IPalette Palette { get { return palette; } }
+        public object DecoderProps { get { return picture?.Decoder.Properties; } }
         public ColorFormat ColorFormat { get { return picture == null ? null : picture.ColorFormat; } }
         public IPictureAdapter PictureAdapter { get { return picture; } }
         public bool IsDocumentChanged { get { return document == null ? false : isDocumentChanged; } }
@@ -73,7 +74,7 @@ namespace Rippix {
         }
         public void SetColorFormat(ColorFormat colorFormat) {
             if (picture == null) return;
-            picture.ColorBPP = colorFormat.UsedBits;
+            //picture.ColorBPP = colorFormat.UsedBits;
             picture.ColorFormat = new ColorFormat(colorFormat);
             OnChanged();
         }
@@ -86,7 +87,7 @@ namespace Rippix {
             document.CurrentResource.TilePack.Rows = picture.TileRows;
             int plength = 1;
             if (picture.Decoder is INeedsPalette) {
-                plength = 1 << picture.ColorBPP;
+                plength = ((INeedsPalette)picture.Decoder).ColorCount;
             }
             ((GrayscalePalette)palette).Length = plength;
             ((PalettePictureAdapter)PalettePicture).Length = ((GrayscalePalette)palette).Length;//TODO: crutch!

@@ -25,25 +25,17 @@ namespace Rippix {
         int TileRows { get; set; }
     }
 
-    //public interface IPictureFormat : IPicture, IPictureAdapter {
-    //    byte[] Data { get; set; }
-    //    int ColorBPP { get; set; }
-    //    ColorFormat ColorFormat { get; set; }
-    //    IPictureDecoder Decoder { get; }
-    //    event EventHandler Changed;
-    //}
-
-    public interface IPictureDecoderController {
-        event EventHandler Changed;
+    public interface ISizeController {
         int Width { get; set; }
         int Height { get; set; }
-        int ColorBPP { get; set; }
+    }
+
+    public interface IColorFormatController {
         ColorFormat ColorFormat { get; set; }
     }
 
     public class PictureAdapter : IPicture, IPictureAdapter, INotifyPropertyChanged {
         private IPictureDecoder decoder;
-        private IPictureDecoderController pictureControl;
         private byte[] data;
         private int picOffset;
         private int zoom;
@@ -52,9 +44,9 @@ namespace Rippix {
         private int tileCount = 1;
         public PictureAdapter(IPictureDecoder decoder) {
             this.decoder = decoder;
-            this.pictureControl = decoder as IPictureDecoderController;
-            if (this.pictureControl != null) {
-                this.pictureControl.Changed += decoder_Changed;
+            var pictureControl = decoder as INotifyPropertyChanged;
+            if(pictureControl != null) {
+                pictureControl.PropertyChanged += decoder_Changed;
             }
         }
         void decoder_Changed(object sender, EventArgs e) {
@@ -70,13 +62,9 @@ namespace Rippix {
                 OnChanged("Data");
             }
         }
-        public int ColorBPP {
-            get { return (pictureControl != null) ? pictureControl.ColorBPP : 0; }
-            set { if (pictureControl != null) { pictureControl.ColorBPP = value; OnChanged(""); } }
-        }
         public ColorFormat ColorFormat {
-            get { return (pictureControl != null) ? pictureControl.ColorFormat : null; }
-            set { if (pictureControl != null) { pictureControl.ColorFormat = value; OnChanged(""); } }
+            get { return (decoder.Properties as IColorFormatController)?.ColorFormat; }
+            set { if(decoder.Properties is IColorFormatController) { ((IColorFormatController)decoder.Properties).ColorFormat = value; OnChanged(""); } }
         }
         public int PicOffset {
             get { return picOffset; }
@@ -89,12 +77,12 @@ namespace Rippix {
             get { return decoder.LineStride * decoder.ImageHeight; }
         }
         public int Width {
-            get { return (pictureControl != null) ? pictureControl.Width : 0; }
-            set { if (pictureControl != null) { pictureControl.Width = value; OnChanged(""); } }
+            get { return (decoder.Properties is ISizeController) ? ((ISizeController)decoder.Properties).Width : 0; }
+            set { if(decoder.Properties is ISizeController) { ((ISizeController)decoder.Properties).Width = value; OnChanged(""); } }
         }
         public int Height {
-            get { return (pictureControl != null) ? pictureControl.Height : 0; }
-            set { if (pictureControl != null) { pictureControl.Height = value; OnChanged(""); } }
+            get { return (decoder.Properties is ISizeController) ? ((ISizeController)decoder.Properties).Height : 0; }
+            set { if(decoder.Properties is ISizeController) { ((ISizeController)decoder.Properties).Height = value; OnChanged(""); } }
         }
         public int Zoom {
             get { return zoom; }

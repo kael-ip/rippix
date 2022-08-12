@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorFormat.cs" />
-    <Compile Include="Decoder.cs" />
+    <Compile Include="Adapters.cs" />
     <Compile Include="Decoders\DirectDecoder.cs" />
     <Compile Include="Decoders\PackedDecoder.cs" />
     <Compile Include="Decoders\TestPictureDecoder.cs" />

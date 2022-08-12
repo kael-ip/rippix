@@ -7,17 +7,17 @@ using System.Text;
 
 namespace Rippix.Decoders {
 
-    public class PackedDecoder : IPictureDecoder, INeedsPalette, IPictureDecoderController, INotifyPropertyChanged {
+    public class PackedDecoder : IPictureDecoder, INeedsPalette, INotifyPropertyChanged {
+        readonly DecoderProperties props;
         private int width;
         private int height;
         private int ppbyp;//pixels per byte power
         private IPalette palette;
-        private ColorFormat colorFormat;
         public PackedDecoder() {
             this.width = 16;
             this.height = 16;
             this.ppbyp = 0;
-            this.ColorFormat = new Rippix.ColorFormat(16, 8, 8, 8, 0, 8, 24, 8);
+            this.props = new DecoderProperties(this);
         }
         void colorFormat_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             OnChanged("ColorFormat." + e.PropertyName);
@@ -39,6 +39,7 @@ namespace Rippix.Decoders {
                 OnChanged("Palette");
             }
         }
+        public int ColorCount { get { return 1 << ColorBPP; } }
         public int ColorBPP {
             get { return (1<<(3-ppbyp)); }//(3)8->1/(2)4->2/(1)2->4/(0)1->8
             set { SetIntPropertyValue("ColorBPP", ref ppbyp, fromBPP(value), 0, 3); }//{1/2/4/8}
@@ -50,20 +51,6 @@ namespace Rippix.Decoders {
                 case 4: return 1;
                 case 8: return 0;
                 default: return 0; //throw new NotSupportedException();
-            }
-        }
-        public ColorFormat ColorFormat {
-            get { return colorFormat; }
-            set {
-                if (Equals(colorFormat, value)) return;
-                if (colorFormat != null) {
-                    colorFormat.PropertyChanged -= colorFormat_PropertyChanged;
-                }
-                colorFormat = value;
-                if (colorFormat != null) {
-                    colorFormat.PropertyChanged += colorFormat_PropertyChanged;
-                }
-                OnChanged("ColorFormat");
             }
         }
         protected void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
@@ -109,41 +96,37 @@ namespace Rippix.Decoders {
         }
         public void ReadParameters(IList<Parameter> parameters) {
             parameters.Peek("ppbyp", out ppbyp, 0);
-            ColorFormat = new Rippix.ColorFormat(parameters.Peek("ColorFormat", ColorFormat.A8R8G8B8));
             parameters.Peek("Width", out width, 1);
             parameters.Peek("Height", out height, 8);
         }
         public void WriteParameters(IList<Parameter> parameters) {
             parameters.Poke("Width", width);
             parameters.Poke("Height", height);
-            if (ColorFormat != null) {
-                parameters.Poke("ColorFormat", ColorFormat);
-            }
             parameters.Poke("ppbyp", ppbyp);
         }
         protected void OnChanged(string propertyName) {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            if (Changed != null) Changed(this, EventArgs.Empty);
         }
         public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler Changed;
-        #region IPictureController
-        int IPictureDecoderController.Width {
-            get { return this.width; }
-            set { this.width = value; }
+        public object Properties { get { return props; } }
+
+        public class DecoderProperties : ISizeController {
+            readonly PackedDecoder self;
+            public DecoderProperties(PackedDecoder self) {
+                this.self = self;
+            }
+            public int Width {
+                get { return self.width; }
+                set { self.width = value; }
+            }
+            public int Height {
+                get { return self.height; }
+                set { self.height = value; }
+            }
+            public int ColorBPP {
+                get { return self.ColorBPP; }
+                set { self.ColorBPP = value; }
+            }
         }
-        int IPictureDecoderController.Height {
-            get { return this.height; }
-            set { this.height = value; }
-        }
-        int IPictureDecoderController.ColorBPP {
-            get { return this.ColorBPP; }
-            set { this.ColorBPP = value; }
-        }
-        ColorFormat IPictureDecoderController.ColorFormat {
-            get { return this.ColorFormat; }
-            set { this.ColorFormat = value; }
-        }
-        #endregion
     }
 }

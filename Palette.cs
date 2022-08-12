@@ -12,6 +12,7 @@ namespace Rippix {
 
     public interface INeedsPalette {
         IPalette Palette { get; set; }
+        int ColorCount { get; }
     }
 
     public class GrayscalePalette : IPalette {

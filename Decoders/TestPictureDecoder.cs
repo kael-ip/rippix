@@ -5,10 +5,14 @@ using Rippix.Model;
 
 namespace Rippix.Decoders {
 
-    public class TestPictureDecoder : INotifyPropertyChanged, IPictureDecoder, IPictureDecoderController {
+    public class TestPictureDecoder : INotifyPropertyChanged, IPictureDecoder {
+        readonly DecoderProperties props;
         private int planesCount = 4;
         private int width = 40;
         private int height = 200;
+        public TestPictureDecoder() {
+            this.props = new DecoderProperties(this);
+        }
         private byte GetData(byte[] data, int offset) {
             if(data == null || offset < 0 || offset >= data.Length)
                 return 0;
@@ -33,10 +37,8 @@ namespace Rippix.Decoders {
             return ColorFormat.Pack(v, v, v, 255);
         }
         public void ReadParameters(IList<Parameter> parameters) {
-            //throw new NotImplementedException();
         }
         public void WriteParameters(IList<Parameter> parameters) {
-            //throw new NotImplementedException();
         }
         protected void SetIntPropertyValue(string name, ref int store, int value, int min, int max) {
             if(value == store)
@@ -47,28 +49,23 @@ namespace Rippix.Decoders {
         private void OnChanged(string propertyName) {
             if(PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            if(Changed != null)
-                Changed(this, EventArgs.Empty);
         }
         public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler Changed;
-        #region IPictureController
-        int IPictureDecoderController.Width {
-            get { return width; }
-            set { SetIntPropertyValue("Width", ref width, value, 0, int.MaxValue); }
+        public object Properties { get { return props; } }
+
+        public class DecoderProperties : ISizeController {
+            readonly TestPictureDecoder self;
+            public DecoderProperties(TestPictureDecoder self) {
+                this.self = self;
+            }
+            public int Width {
+                get { return self.width; }
+                set { self.width = value; }
+            }
+            public int Height {
+                get { return self.height; }
+                set { self.height = value; }
+            }
         }
-        int IPictureDecoderController.Height {
-            get { return height; }
-            set { SetIntPropertyValue("Height", ref height, value, 0, int.MaxValue); }
-        }
-        int IPictureDecoderController.ColorBPP {
-            get { return 24; }
-            set { }
-        }
-        ColorFormat IPictureDecoderController.ColorFormat {
-            get { return null; }
-            set { }
-        }
-        #endregion
     }
 }

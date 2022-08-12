@@ -18,6 +18,7 @@ namespace Rippix {
 
         private PropertyGrid propertyGrid1;
         private PropertyGrid propertyGrid2;
+        private PropertyGrid propertyGrid3;
         private PixelView pixelViewPicture;
         private PixelView pixelViewPalette;
         private ToolStrip toolStrip1;
@@ -51,6 +52,12 @@ namespace Rippix {
             };
             propertyGrid1.Height = 300;
             this.propertyGrid2 = new PropertyGrid() {
+                HelpVisible = false,
+                ToolbarVisible = false,
+                Dock = DockStyle.Top
+            };
+            propertyGrid2.Height = 100;
+            this.propertyGrid3 = new PropertyGrid() {
                 ToolbarVisible = false,
                 Dock = DockStyle.Fill
             };
@@ -60,7 +67,10 @@ namespace Rippix {
             var panelRight = new Panel(){
                 Dock = DockStyle.Right
             };
+            tabControl.TabPages[0].Controls.Add(this.propertyGrid3);
+            tabControl.TabPages[0].Controls.Add(new Splitter() { Dock = DockStyle.Top });
             tabControl.TabPages[0].Controls.Add(this.propertyGrid2);
+            tabControl.TabPages[0].Controls.Add(new Splitter() { Dock = DockStyle.Top });
             tabControl.TabPages[0].Controls.Add(this.propertyGrid1);
             CreateResourceListBox();
             tabControl.TabPages[1].Controls.Add(this.listBoxResources);
@@ -98,7 +108,8 @@ namespace Rippix {
         void viewModel_Changed(object sender, EventArgs e) {
             if (viewModel.Picture == null) return;
             propertyGrid1.SelectedObject = viewModel.Picture;
-            propertyGrid2.SelectedObject = viewModel.ColorFormat;
+            propertyGrid2.SelectedObject = viewModel.DecoderProps;
+            propertyGrid3.SelectedObject = viewModel.ColorFormat;
             seekController.Format = viewModel.PictureAdapter;
             if (seekController.Format != null) {
                 pixelViewPicture.Zoom = seekController.Format.Zoom;
@@ -106,6 +117,7 @@ namespace Rippix {
             }
             propertyGrid1.Refresh();
             propertyGrid2.Refresh();
+            propertyGrid3.Refresh();
             highlightColorItem();
             highlightFormatItem();
             pixelViewPicture.Format = viewModel.Picture;
