@@ -53,6 +53,7 @@
     <Compile Include="Decoder.cs" />
     <Compile Include="Decoders\DirectDecoder.cs" />
     <Compile Include="Decoders\PackedDecoder.cs" />
+    <Compile Include="Decoders\TestPictureDecoder.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
