@@ -22,6 +22,8 @@ TODO:
 
 .Tile Map resource type
 
+.Avoid GDI leaks
+
 Modes:
 [Direct/Indexed]
 [Packed/Planar/Composite]

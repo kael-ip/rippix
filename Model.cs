@@ -220,7 +220,7 @@ namespace Rippix.Model {
         public static void Save<T>(T obj, string fileName) {
             var ns = new XmlSerializerNamespaces();
             ns.Add("", ""); 
-            var s = new XmlSerializer(typeof(T), string.Empty);            
+            var s = new XmlSerializer(typeof(T), string.Empty);
             using (var fs = File.Create(fileName)) {
                 s.Serialize(fs, obj, ns);
             }
