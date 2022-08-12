@@ -15,6 +15,7 @@ TODO:
 .Fixed palettes save and load
 .Pan h&v per pixel, not per byte (as an option in multibyte packing modes)
 .Some exotic modes
++Pack small tiles in grid
 
 .Image resource selection view
 .Palette resource selection view

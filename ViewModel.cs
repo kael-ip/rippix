@@ -11,14 +11,13 @@ namespace Rippix {
         private bool isDocumentChanged;
         private bool isPictureChanged;
         private bool isPaletteChanged;
-        private IPictureFormat picture;
+        private PictureAdapter picture;
         private IPalette palette;
         private IPicture palettePicture;
 
         public IPicture Picture { get { return picture; } }
         public IPalette Palette { get { return palette; } }
         public ColorFormat ColorFormat { get { return picture == null ? null : picture.ColorFormat; } }
-        //public IPictureDecoder Decoder { get { return picture == null ? null : picture.Decoder; } }
         public IPictureAdapter PictureAdapter { get { return picture; } }
         public bool IsDocumentChanged { get { return document == null ? false : isDocumentChanged; } }
         public bool IsPictureChanged { get { return isPictureChanged; } }
@@ -54,6 +53,10 @@ namespace Rippix {
             picture = new PictureAdapter(decoder);
             picture.Data = document.Data;
             picture.PicOffset = document.CurrentResource.Offset;
+            if(document.CurrentResource.TilePack != null) {
+                picture.TileColumns = document.CurrentResource.TilePack.Columns;
+                picture.TileRows = document.CurrentResource.TilePack.Rows;
+            }
             if (old != null) {
                 picture.Zoom = old.Zoom;
             }
@@ -76,12 +79,17 @@ namespace Rippix {
         }
         void Format_Changed(object sender, EventArgs e) {
             document.CurrentResource.Offset = picture.PicOffset;
+            if(document.CurrentResource.TilePack == null) {
+                document.CurrentResource.TilePack = new TilePack();
+            }
+            document.CurrentResource.TilePack.Columns = picture.TileColumns;
+            document.CurrentResource.TilePack.Rows = picture.TileRows;
             int plength = 1;
             if (picture.Decoder is INeedsPalette) {
                 plength = 1 << picture.ColorBPP;
             }
             ((GrayscalePalette)palette).Length = plength;
-            ((PalettePictureAdapter)PalettePicture).Length = ((GrayscalePalette)palette).Length;
+            ((PalettePictureAdapter)PalettePicture).Length = ((GrayscalePalette)palette).Length;//TODO: crutch!
             OnChanged();
         }
         public IList<Preset> GetAvailableDecoders() {

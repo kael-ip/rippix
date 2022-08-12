@@ -30,6 +30,7 @@ namespace Rippix.Model {
                         currentResource.Offset = 0;
                         currentResource.Format = new Format();
                         currentResource.Format.Code = "sample";
+                        currentResource.TilePack = new TilePack();
                     }
                 }
                 return currentResource;
@@ -70,6 +71,7 @@ namespace Rippix.Model {
         [XmlAttribute]
         public int Offset { get; set; }
         public Format Format { get; set; }
+        public TilePack TilePack { get; set; }
         public Resource Clone() {
             Resource clone = new Resource();
             clone.Assign(this);
@@ -78,6 +80,27 @@ namespace Rippix.Model {
         public void Assign(Resource source) {
             this.Offset = source.Offset;
             this.Format = source.Format.Clone();
+            this.TilePack = source.TilePack?.Clone();
+        }
+    }
+
+    public class TilePack {
+        public int Columns { get; set; }
+        public int Rows { get; set; }
+        //public int Count { get; set; }
+        public TilePack() {
+            Rows = Columns = 1;
+            //Count = Rows * Columns;
+        }
+        public TilePack Clone() {
+            TilePack clone = new TilePack();
+            clone.Assign(this);
+            return clone;
+        }
+        public void Assign(TilePack source) {
+            //this.Count = source.Count;
+            this.Columns = source.Columns;
+            this.Rows = source.Rows;
         }
     }
 

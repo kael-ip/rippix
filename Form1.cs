@@ -220,6 +220,11 @@ namespace Rippix {
             toolStrip1.Items.Add(CreateSeekCommandItem("H+", ImageSeekCommand.ChangeHeight, 1, true));
             toolStrip1.Items.Add(CreateSeekCommandItem("Z-", ImageSeekCommand.ChangeZoom, -1, false));
             toolStrip1.Items.Add(CreateSeekCommandItem("Z+", ImageSeekCommand.ChangeZoom, 1, false));
+            toolStrip1.Items.Add(new ToolStripSeparator());
+            toolStrip1.Items.Add(CreateSeekCommandItem("TW-", ImageSeekCommand.ChangeTileColumns, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("TW+", ImageSeekCommand.ChangeTileColumns, 1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("TH-", ImageSeekCommand.ChangeTileRows, -1, true));
+            toolStrip1.Items.Add(CreateSeekCommandItem("TH+", ImageSeekCommand.ChangeTileRows, 1, true));
         }
         private ToolStripItem CreateSeekCommandItem(string caption, ImageSeekCommand cmd, int step, bool useLeap) {
             var item = new ToolStripButton();

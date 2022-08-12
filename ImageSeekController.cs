@@ -11,6 +11,8 @@ namespace Rippix {
         ChangeOffsetByte,
         ChangeOffsetLine,
         ChangeOffsetFrame,
+        ChangeTileColumns,
+        ChangeTileRows,
         ChangeZoom
     }
 
@@ -45,6 +47,14 @@ namespace Rippix {
                     break;
                 case ImageSeekCommand.ChangeOffsetFrame:
                     Format.PicOffset += Format.FrameStride * step;
+                    break;
+                case ImageSeekCommand.ChangeTileColumns:
+                    if(Format.TileColumns + step > 0)
+                        Format.TileColumns += step;
+                    break;
+                case ImageSeekCommand.ChangeTileRows:
+                    if(Format.TileRows + step > 0)
+                        Format.TileRows += step;
                     break;
                 case ImageSeekCommand.ChangeZoom:
                     Format.Zoom += value;
