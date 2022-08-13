@@ -36,6 +36,13 @@ namespace Rippix {
         void control_KeyDown(object sender, KeyEventArgs e) {
             if (Controller == null) return;
             int step = e.Control ? 8 : 1;
+            int tstep = 1;
+            if(e.Control) {
+                tstep = Controller.Format.TileColumns;
+                if(e.Shift) {
+                    tstep *= Controller.Format.TileRows;
+                }
+            }
             if (e.Shift) {
                 switch (e.KeyCode) {
                     case Keys.Up:
@@ -51,8 +58,10 @@ namespace Rippix {
                         Controller.Execute(ImageSeekCommand.ChangeWidth, +step);
                         break;
                     case Keys.PageUp:
+                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, -tstep);
                         break;
                     case Keys.PageDown:
+                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, tstep);
                         break;
                     case Keys.Add:
                     case Keys.Subtract:
@@ -88,10 +97,10 @@ namespace Rippix {
                         Controller.Execute(ImageSeekCommand.ChangeOffsetByte, step);
                         break;
                     case Keys.PageUp:
-                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, -step);
+                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, -tstep);
                         break;
                     case Keys.PageDown:
-                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, step);
+                        Controller.Execute(ImageSeekCommand.ChangeOffsetFrame, tstep);
                         break;
                     case Keys.Add:
                     case Keys.Subtract:
