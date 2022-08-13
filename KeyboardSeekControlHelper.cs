@@ -115,18 +115,23 @@ namespace Rippix {
             control.Refresh();
         }
         public readonly string HelpText = @"
-Key controls:
-Up, Down - Pan vertically
-Left, Right - Pan horizontally
-PageUp, PageDown - Pan vertically by page
-Z - Zoom in
+Keyboard controls (focus the image):
 
-Shift mode:
-Up, Down - Change picture height
-Left, Right - Change picture width
-Z - Zoom out
+Pan horizontally: Left, Right.
+Pan vertically: Up, Down.
+Pan by frame: PageUp, PageDn.
+Pan by tile line: Ctrl+ PageUp, PageDn.
+Pan by tile page: Shift+Ctrl+ PageUp, PageDn.
 
-Control mode - Step by 8 instead of 1
+Change width: Shift+ Left, Right.
+Change height: Shift+ Up, Down.
+Change tile pack columns: Shift+ Brackets.
+Change tile pack rows: Shift+ Semicolon, Period.
+
+Hold Shift to step by 8 units.
+
+Zoom in: Z.
+Zoom out: Shift+ Z.
 ";
 
     }
