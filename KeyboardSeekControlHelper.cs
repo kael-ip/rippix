@@ -56,8 +56,18 @@ namespace Rippix {
                         break;
                     case Keys.Add:
                     case Keys.Subtract:
+                        break;
                     case Keys.OemOpenBrackets:
+                        Controller.Execute(ImageSeekCommand.ChangeTileColumns, -step);
+                        break;
                     case Keys.OemCloseBrackets:
+                        Controller.Execute(ImageSeekCommand.ChangeTileColumns, step);
+                        break;
+                    case Keys.OemSemicolon:
+                        Controller.Execute(ImageSeekCommand.ChangeTileRows, -step);
+                        break;
+                    case Keys.OemPeriod:
+                        Controller.Execute(ImageSeekCommand.ChangeTileRows, step);
                         break;
                     case Keys.Z:
                         Controller.Execute(ImageSeekCommand.ChangeZoom, -1);
