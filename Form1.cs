@@ -25,6 +25,7 @@ namespace Rippix {
         private TabControl tabControl;
         private ToolStripMenuItem colorToolStripMenuItem;
         private ToolStripMenuItem formatToolStripMenuItem;
+        private ToolStripMenuItem paletteToolStripMenuItem;
         private ListBox listBoxResources;
 
         public Form1() {
@@ -38,6 +39,7 @@ namespace Rippix {
             CreateFileMenuItems();
             formatToolStripMenuItem = CreateFormatMenuItems();
             colorToolStripMenuItem = CreateColorMenuItems();
+            paletteToolStripMenuItem = CreatePaletteMenuItems();
             CreateSeekItems();
             seekController = new ImageSeekController();
             inputController = new KeyboardSeekControlHelper(pixelViewPicture);
@@ -197,6 +199,21 @@ namespace Rippix {
                 }
             };
             foreach (var preset in viewModel.GetAvailableColorFormats()) {
+                var item = CreateMenuItem(preset, onExecute);
+                menuItem.DropDownItems.Add(item);
+            }
+            menuStrip.Items.Add(menuItem);
+            return menuItem;
+        }
+        private ToolStripMenuItem CreatePaletteMenuItems() {
+            var menuItem = new ToolStripMenuItem("Palette");
+            menuItem.DropDownItems.Clear();
+            MenuEventHandler onExecute = delegate (ToolStripMenuItem item) {
+                if(item.Tag is string) {
+                    viewModel.SetPalette((string)item.Tag);
+                }
+            };
+            foreach(var preset in viewModel.GetPaletteCommands()) {
                 var item = CreateMenuItem(preset, onExecute);
                 menuItem.DropDownItems.Add(item);
             }

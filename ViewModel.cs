@@ -126,6 +126,11 @@ namespace Rippix {
             }
             return false;
         }
+        public IEnumerable<Preset> GetPaletteCommands() {
+            yield return new Preset("Grayscale", "g");
+        }
+        public void SetPalette(string kind) {
+        }
         public void OpenDataFile(string fileName) {
             document = Helper.LoadOrNew(fileName);
             byte[] data = document.Data;

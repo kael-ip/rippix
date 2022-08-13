@@ -143,6 +143,7 @@ namespace Rippix {
         public PalettePictureAdapter(IPalette palette) {
             this.palette = palette;
         }
+        public IPalette Palette { get { return palette; } }
         public int Length { get; set; }
         public int ImageWidth {
             get { return Length / ImageHeight; }
