@@ -129,6 +129,7 @@ namespace Rippix {
             pixelViewPalette.Refresh();
             listBoxResources.DataSource = viewModel.Resources;
             listBoxResources.Refresh();
+            this.Text = viewModel.Title;
         }
         private void highlightColorItem() {
             foreach (var item in colorToolStripMenuItem.DropDownItems) {

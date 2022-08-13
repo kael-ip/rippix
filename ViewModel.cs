@@ -25,6 +25,7 @@ namespace Rippix {
         public bool IsPaletteChanged { get { return isPaletteChanged; } }
         public IPicture PalettePicture { get { return palettePicture; } }
         public IList<Resource> Resources { get { return document == null ? null : document.Resources; } }
+        public string Title { get { return document == null ? "(no image loaded)" : ("Rippix: " + document.FileName); } }
         public event EventHandler Changed;
 
         static ViewModel() {
