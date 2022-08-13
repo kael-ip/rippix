@@ -132,6 +132,8 @@ namespace Rippix.Model {
                     decoder = DecoderFactory.Instance.Create(Code);
                     if (decoder != null) {
                         decoder.ReadParameters(parameters);
+                        parameters.Clear();
+                        decoder.WriteParameters(parameters);
                     }
                 }
                 return decoder;
