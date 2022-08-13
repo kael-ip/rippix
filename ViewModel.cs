@@ -1,4 +1,4 @@
-﻿using Rippix.Decoders;
+using Rippix.Decoders;
 using Rippix.Model;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace Rippix {
         static ViewModel() {
             DecoderFactory.Instance.Register<DirectDecoder>("Direct");
             DecoderFactory.Instance.Register<PackedDecoder>("Packed");
-            DecoderFactory.Instance.Register<TestPictureDecoder>("$Planar$0.1");
+            DecoderFactory.Instance.Register<PlanarDecoder>("Planar");
         }
         public ViewModel() {
             palette = new GrayscalePalette();
@@ -97,7 +97,7 @@ namespace Rippix {
             var list = new List<Preset>();
             list.Add(new Preset("Direct", "Direct"));
             list.Add(new Preset("Packed", "Packed"));
-            list.Add(new Preset("Planar (test)", "$Planar$0.1"));
+            list.Add(new Preset("Planar", "Planar"));
             return list;
         }
         public IList<Preset> GetAvailableColorFormats() {

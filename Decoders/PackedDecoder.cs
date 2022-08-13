@@ -19,9 +19,6 @@ namespace Rippix.Decoders {
             this.ppbyp = 0;
             this.props = new DecoderProperties(this);
         }
-        void colorFormat_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            OnChanged("ColorFormat." + e.PropertyName);
-        }
         void palette_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             OnChanged("Palette." + e.PropertyName);
         }
